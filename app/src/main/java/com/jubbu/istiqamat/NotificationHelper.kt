@@ -196,7 +196,7 @@ class NotificationHelper(private val context: Context) {
         eventId: Int,
         eventTitle: String,
         eventDate: String,
-        reminderDays: Int,
+        reminderMinutes: Int,
         hour: Int,
         minute: Int
     ) {
@@ -206,7 +206,7 @@ class NotificationHelper(private val context: Context) {
             action = NOTIFICATION_TYPE_EVENT
             putExtra("eventId", eventId)
             putExtra("eventTitle", eventTitle)
-            putExtra("reminderDays", reminderDays)
+            putExtra("reminderMinutes", reminderMinutes)
         }
         
         val pendingIntent = PendingIntent.getBroadcast(
@@ -226,8 +226,8 @@ class NotificationHelper(private val context: Context) {
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
             
-            // Subtract reminder days
-            add(Calendar.DAY_OF_YEAR, -reminderDays)
+            // Subtract reminder minutes
+            add(Calendar.MINUTE, -reminderMinutes)
         }
         
         // Only schedule if in the future

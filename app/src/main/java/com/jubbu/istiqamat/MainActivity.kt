@@ -12,11 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
+    private lateinit var notificationHelper: NotificationHelper
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        notificationHelper = NotificationHelper(this)
 
         webView = findViewById(R.id.webView)
 
@@ -73,6 +76,69 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun getCurrentTab(): String {
             return "home"
+        }
+
+        @JavascriptInterface
+        fun scheduleHabit(id: Int, title: String, time: String, daysJson: String, message: String) {
+            try {
+                val parts = time.split(":")
+                val hour = parts[0].toInt()
+                val minute = parts[1].toInt()
+                
+                val jsonArray = org.json.JSONArray(daysJson)
+                val days = IntArray(jsonArray.length())
+                for (i in 0 until jsonArray.length()) {
+                    days[i] = jsonArray.getInt(i)
+                }
+                
+                notificationHelper.scheduleHabitNotification(id, title, message, hour, minute, days)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        @JavascriptInterface
+        fun cancelHabit(id: Int) {
+            notificationHelper.cancelHabitNotification(id)
+        }
+
+        @JavascriptInterface
+        fun scheduleEvent(id: Long, title: String, date: String, time: String, reminderMinutes: Int) {
+            try {
+                val parts = time.split(":")
+                val hour = parts[0].toInt()
+                val minute = parts[1].toInt()
+                
+                // Use hashcode or modulo for Int ID
+                val intId = (id % Int.MAX_VALUE).toInt()
+                
+                notificationHelper.scheduleEventNotification(intId, title, date, reminderMinutes, hour, minute)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        @JavascriptInterface
+        fun cancelEvent(id: Long) {
+            val intId = (id % Int.MAX_VALUE).toInt()
+            notificationHelper.cancelEventNotification(intId)
+        }
+
+        @JavascriptInterface
+        fun updateSettings(dailyTime: String, streakTime: String, dailyEnabled: Boolean, streakEnabled: Boolean) {
+            try {
+                if (dailyEnabled) {
+                    val parts = dailyTime.split(":")
+                    notificationHelper.scheduleDailyCheck(parts[0].toInt(), parts[1].toInt())
+                }
+                
+                if (streakEnabled) {
+                    val parts = streakTime.split(":")
+                    notificationHelper.scheduleStreakWarning(parts[0].toInt(), parts[1].toInt())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

@@ -1478,12 +1478,34 @@
                 saveData();
                 renderAll();
                 closeEditModal();
+                // Android Notification Sync
+                if (window.Android && window.Android.scheduleHabit) {
+                    if (h.notificationsEnabled && h.notificationTime) {
+                        window.Android.scheduleHabit(
+                            h.id,
+                            h.title,
+                            h.notificationTime,
+                            JSON.stringify(h.notificationDays || [0,1,2,3,4,5,6]),
+                            h.notificationMessage || "Time for your habit!"
+                        );
+                    } else {
+                        window.Android.cancelHabit(h.id);
+                    }
+                }
                 showToast("Habit Updated!");
             }
         }
 
         function deleteHabit(id) {
-            if (confirm("Delete this habit?")) { appData.habits = appData.habits.filter(h => h.id !== id); saveData(); renderAll(); showToast("Habit Deleted"); }
+            if (confirm("Delete this habit?")) {
+                if (window.Android && window.Android.cancelHabit) {
+                    window.Android.cancelHabit(id);
+                }
+                appData.habits = appData.habits.filter(h => h.id !== id);
+                saveData();
+                renderAll();
+                showToast("Habit Deleted");
+            }
         }
 
         // --- ADD HABIT LOGIC ---
@@ -1536,6 +1558,17 @@
 
             saveData();
             renderEvents();
+            // Android Notification Sync
+            if (window.Android && window.Android.scheduleEvent) {
+                const newEvent = appData.events[appData.events.length-1];
+                window.Android.scheduleEvent(
+                    newEvent.id,
+                    newEvent.title,
+                    newEvent.date,
+                    newEvent.time,
+                    parseInt(newEvent.reminder)
+                );
+            }
             showToast("Event Added");
             
             // Clear inputs
@@ -1576,6 +1609,10 @@
 
         function deleteEvent(index) {
             if (confirm("Delete this event?")) {
+                const eventId = appData.events[index].id;
+                if (window.Android && window.Android.cancelEvent) {
+                    window.Android.cancelEvent(eventId);
+                }
                 appData.events.splice(index, 1);
                 saveData();
                 renderEvents();
@@ -1655,6 +1692,14 @@
             appData.settings.dailyCheckTime = document.getElementById('setting-daily-time').value;
             appData.settings.streakWarningTime = document.getElementById('setting-streak-time').value;
             saveData();
+            if (window.Android && window.Android.updateSettings) {
+                window.Android.updateSettings(
+                    appData.settings.dailyCheckTime,
+                    appData.settings.streakWarningTime,
+                    appData.settings.dailyCheckEnabled,
+                    appData.settings.streakWarningEnabled
+                );
+            }
             showToast("Settings Saved");
         }
 
