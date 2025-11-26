@@ -2,6 +2,8 @@ package com.jubbu.istiqamat
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.content.Context
+import android.content.Intent
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -69,6 +71,28 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        intent?.let {
+            if (it.hasExtra("toggleHabitId")) {
+                val habitId = it.getIntExtra("toggleHabitId", -1)
+                if (habitId != -1) {
+                    // Delay slightly to ensure WebView is ready if cold start
+                    webView.postDelayed({
+                        webView.evaluateJavascript("handleHabitClick($habitId);", null)
+                    }, 1000)
+                }
+            }
+        }
     }
 
     // JavaScript Interface
@@ -139,6 +163,22 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+
+        @JavascriptInterface
+        fun syncData(jsonData: String) {
+            val prefs = getSharedPreferences("IstiqamatWidgetData", Context.MODE_PRIVATE)
+            prefs.edit().putString("appData", jsonData).apply()
+            
+            // Trigger widget update
+            val intent = Intent(this@MainActivity, IstiqamatWidget::class.java).apply {
+                action = android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            val ids = android.appwidget.AppWidgetManager.getInstance(application).getAppWidgetIds(
+                android.content.ComponentName(application, IstiqamatWidget::class.java)
+            )
+            intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            sendBroadcast(intent)
         }
     }
 }
