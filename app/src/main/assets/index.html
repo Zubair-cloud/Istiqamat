@@ -902,6 +902,33 @@
                 </div>
             </div>
 
+            <!-- EVENTS SECTION -->
+            <div id="manage-events-section" style="display:none;">
+                <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
+                    <h3 style="margin-bottom:15px;">Add New Event</h3>
+                    <div class="input-group">
+                        <label>Event Title</label>
+                        <input type="text" id="new-event-title" placeholder="e.g., Dentist Appointment">
+                    </div>
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" id="new-event-date">
+                    </div>
+                    <div class="input-group">
+                        <label>Time</label>
+                        <input type="time" id="new-event-time">
+                    </div>
+                    <div class="input-group">
+                        <label>Remind me before (minutes)</label>
+                        <input type="number" id="new-event-reminder" value="30">
+                    </div>
+                    <button class="btn-primary" onclick="addNewEvent()">Add Event</button>
+                </div>
+
+                <span class="section-title">Upcoming Events</span>
+                <div id="events-list"></div>
+            </div>
+
         </div>
     </div>
 
@@ -977,6 +1004,18 @@
     <div class="modal-overlay" id="settings-modal">
         <div class="glass-panel add-modal">
             <h2 style="margin-bottom:20px;">Settings</h2>
+
+            <span class="section-title">Notifications</span>
+            <div class="glass-panel" style="padding:15px; margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <label>Daily Check-in</label>
+                    <input type="time" id="setting-daily-time" onchange="saveGlobalSettings()">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label>Streak Warning</label>
+                    <input type="time" id="setting-streak-time" onchange="saveGlobalSettings()">
+                </div>
+            </div>
 
             <span class="section-title">Data Management</span>
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -1078,6 +1117,18 @@
                 <label>Time (Optional)</label>
                 <input type="time" id="edit-habit-time">
             </div>
+            <div class="input-group" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <input type="checkbox" id="edit-notif-enabled" onchange="toggleEditNotifTime()" style="width:auto;">
+                    <label style="margin:0;">Enable Notifications</label>
+                </div>
+                <div id="edit-notif-settings" style="display:none;">
+                    <label>Notification Time</label>
+                    <input type="time" id="edit-notif-time" style="margin-bottom:10px;">
+                    <label>Custom Message</label>
+                    <input type="text" id="edit-notif-msg" placeholder="Time for your habit!">
+                </div>
+            </div>
             <div style="display:flex; gap:10px;">
                 <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:#fff;"
                     onclick="closeEditModal()">Cancel</button>
@@ -1157,6 +1208,7 @@
 
             // NEW: Update heatmap dates
             renderHeatmap();
+            renderEvents();
         }
 
         // --- DATA ---
@@ -1205,10 +1257,14 @@
         // --- JOURNAL LOGIC ---
         function switchManageTab(tab) {
             document.querySelectorAll('.manage-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.manage-tab')[tab === 'habits' ? 0 : 1].classList.add('active');
+            const tabs = document.querySelectorAll('.manage-tab');
+            if(tab === 'habits') tabs[0].classList.add('active');
+            else if(tab === 'journal') tabs[1].classList.add('active');
+            else if(tab === 'events') tabs[2].classList.add('active');
 
             document.getElementById('manage-habits-section').style.display = tab === 'habits' ? 'block' : 'none';
             document.getElementById('manage-journal-section').style.display = tab === 'journal' ? 'block' : 'none';
+            document.getElementById('manage-events-section').style.display = tab === 'events' ? 'block' : 'none';
 
             if (tab === 'journal') {
                 document.getElementById('journal-date-input').value = appData.currentDate;
@@ -1379,6 +1435,10 @@
             document.getElementById('edit-habit-id').value = h.id;
             document.getElementById('edit-habit-name').value = h.title;
             document.getElementById('edit-habit-time').value = h.time || '';
+            document.getElementById('edit-notif-enabled').checked = h.notificationsEnabled || false;
+            document.getElementById('edit-notif-time').value = h.notificationTime || h.time || '';
+            document.getElementById('edit-notif-msg').value = h.notificationMessage || '';
+            toggleEditNotifTime();
 
             const targetGroup = document.getElementById('edit-target-group');
             if (h.type === 'counter') {
@@ -1392,17 +1452,28 @@
         }
 
         function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
+        function toggleEditNotifTime() {
+            const enabled = document.getElementById('edit-notif-enabled').checked;
+            document.getElementById('edit-notif-settings').style.display = enabled ? 'block' : 'none';
+        }
+
 
         function saveEditHabit() {
             const id = parseInt(document.getElementById('edit-habit-id').value);
             const name = document.getElementById('edit-habit-name').value;
             const time = document.getElementById('edit-habit-time').value;
+            const notifEnabled = document.getElementById('edit-notif-enabled').checked;
+            const notifTime = document.getElementById('edit-notif-time').value;
+            const notifMsg = document.getElementById('edit-notif-msg').value;
             const target = document.getElementById('edit-habit-target').value;
 
             const h = appData.habits.find(x => x.id === id);
             if (h) {
                 h.title = name;
                 h.time = time;
+                h.notificationsEnabled = notifEnabled;
+                h.notificationTime = notifTime;
+                h.notificationMessage = notifMsg;
                 if (h.type === 'counter') h.target = parseInt(target);
                 saveData();
                 renderAll();
@@ -1441,6 +1512,76 @@
             saveData(); closeAddModal(); renderAll(); showToast("New Habit Added!");
         }
 
+
+        // --- EVENTS LOGIC ---
+        function addNewEvent() {
+            const title = document.getElementById('new-event-title').value;
+            const date = document.getElementById('new-event-date').value;
+            const time = document.getElementById('new-event-time').value;
+            const reminder = document.getElementById('new-event-reminder').value;
+
+            if (!title || !date || !time) {
+                showToast("Please fill all fields");
+                return;
+            }
+
+            appData.events.push({
+                id: Date.now(),
+                title,
+                date,
+                time,
+                reminder,
+                notified: false
+            });
+
+            saveData();
+            renderEvents();
+            showToast("Event Added");
+            
+            // Clear inputs
+            document.getElementById('new-event-title').value = '';
+            document.getElementById('new-event-date').value = '';
+            document.getElementById('new-event-time').value = '';
+        }
+
+        function renderEvents() {
+            const list = document.getElementById('events-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            // Sort by date/time
+            appData.events.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
+
+            if (appData.events.length === 0) {
+                list.innerHTML = `<p style="text-align:center; color:#666; padding:20px; font-size:0.8rem;">No upcoming events.</p>`;
+                return;
+            }
+
+            appData.events.forEach((e, index) => {
+                const html = `
+                <div class="glass-panel" style="padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h4 style="margin:0; margin-bottom:5px;">${e.title}</h4>
+                        <p style="margin:0; font-size:0.8rem; color:var(--neon-cyan);">${e.date} at ${e.time}</p>
+                        <p style="margin:0; font-size:0.7rem; color:#aaa;">Reminder: ${e.reminder}m before</p>
+                    </div>
+                    <button onclick="deleteEvent(${index})" style="background:none; border:none; color:var(--danger); cursor:pointer;">
+                        <i class="ph-bold ph-trash" style="font-size:1.2rem;"></i>
+                    </button>
+                </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function deleteEvent(index) {
+            if (confirm("Delete this event?")) {
+                appData.events.splice(index, 1);
+                saveData();
+                renderEvents();
+                showToast("Event Deleted");
+            }
+        }
         // --- STANDARD HELPERS ---
         function renderProfileInfo() {
             document.querySelectorAll('.display-name').forEach(el => el.innerText = appData.user.name);
@@ -1500,8 +1641,22 @@
         }
 
         // --- SETTINGS & BACKUP ---
-        function openSettingsModal() { document.getElementById('settings-modal').classList.add('open'); }
+        function openSettingsModal() {
+            if(appData.settings) {
+                document.getElementById('setting-daily-time').value = appData.settings.dailyCheckTime || "21:00";
+                document.getElementById('setting-streak-time').value = appData.settings.streakWarningTime || "22:00";
+            }
+            document.getElementById('settings-modal').classList.add('open');
+        }
         function closeSettingsModal() { document.getElementById('settings-modal').classList.remove('open'); }
+
+        function saveGlobalSettings() {
+            if(!appData.settings) appData.settings = {};
+            appData.settings.dailyCheckTime = document.getElementById('setting-daily-time').value;
+            appData.settings.streakWarningTime = document.getElementById('setting-streak-time').value;
+            saveData();
+            showToast("Settings Saved");
+        }
 
         function backupData() {
             const dataStr = JSON.stringify(appData); const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
