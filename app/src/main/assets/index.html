@@ -1120,6 +1120,13 @@
             habitLogs: {},
             journal: {}, // Format: "YYYY-MM-DD": "Journal text"
             history: [],
+            events: [], // NEW: Event reminders
+            settings: { // NEW: Global notification settings
+                dailyCheckTime: "21:00",
+                dailyCheckEnabled: true,
+                streakWarningEnabled: true,
+                streakWarningTime: "22:00"
+            },
             lastLoginDate: new Date().toISOString().split('T')[0],
             currentDate: new Date().toISOString().split('T')[0]
         };
@@ -1157,6 +1164,28 @@
             const saved = localStorage.getItem('istiqamat_data_v3');
             if (saved) {
                 appData = JSON.parse(saved);
+
+                // NEW: Migration for notification features
+                if (appData.habits) {
+                    appData.habits = appData.habits.map(h => ({
+                        ...h,
+                        notificationsEnabled: h.notificationsEnabled !== undefined ? h.notificationsEnabled : false,
+                        notificationTime: h.notificationTime || h.time || "09:00",
+                        notificationMessage: h.notificationMessage || `Time for ${h.title}! ✨`,
+                        notificationDays: h.notificationDays || [0,1,2,3,4,5,6], // All days
+                        lastNotificationDate: h.lastNotificationDate || null
+                    }));
+                }
+                
+                if (!appData.events) appData.events = [];
+                if (!appData.settings) {
+                    appData.settings = {
+                        dailyCheckTime: "21:00",
+                        dailyCheckEnabled: true,
+                        streakWarningEnabled: true,
+                        streakWarningTime: "22:00"
+                    };
+                }
                 if (!appData.habitLogs) appData.habitLogs = {};
                 if (!appData.journal) appData.journal = {};
                 if (!appData.currentDate) appData.currentDate = new Date().toISOString().split('T')[0];
