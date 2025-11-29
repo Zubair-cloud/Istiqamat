@@ -902,6 +902,43 @@
                 </div>
             </div>
 
+    <!-- MANAGE SCREEN -->
+    <div id="manage-screen" class="screen">
+        <header class="app-header">
+            <h1>Manage</h1>
+            <div class="points-badge profile-points-display">0 💎</div>
+        </header>
+        <div class="content-area">
+
+            <div class="manage-tabs">
+                <div class="manage-tab active" onclick="switchManageTab('habits')">Habits</div>
+                <div class="manage-tab" onclick="switchManageTab('journal')">Journal</div>
+                <div class="manage-tab" onclick="switchManageTab('events')">Events</div>
+            </div>
+
+            <!-- HABITS SECTION -->
+            <div id="manage-habits-section">
+                <span class="section-title">Active Habits</span>
+                <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Tap on any habit to Edit details.</p>
+                <div id="manage-list"></div>
+            </div>
+
+            <!-- JOURNAL SECTION -->
+            <div id="manage-journal-section" style="display:none;">
+                <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
+                    <div class="input-group">
+                        <label>Journal Date</label>
+                        <input type="date" id="journal-date-input" onchange="loadJournalEntry()">
+                    </div>
+                    <textarea id="journal-text" rows="6" placeholder="Write your thoughts... (How was your day?)"
+                        style="width:100%; resize:none;"></textarea>
+                    <button class="btn-primary" onclick="saveJournalEntry()">Save Entry</button>
+                </div>
+
+                <span class="section-title">Recent Entries</span>
+                <div id="journal-history" class="glass-panel" style="min-height:100px;"></div>
+            </div>
+
             <!-- EVENTS SECTION -->
             <div id="manage-events-section" style="display:none;">
                 <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
@@ -932,41 +969,6 @@
         </div>
     </div>
 
-    <!-- MANAGE SCREEN -->
-    <div id="manage-screen" class="screen">
-        <header class="app-header">
-            <h1>Manage</h1>
-            <div class="points-badge profile-points-display">0 💎</div>
-        </header>
-        <div class="content-area">
-
-            <div class="manage-tabs">
-                <div class="manage-tab active" onclick="switchManageTab('habits')">Habits</div>
-                <div class="manage-tab" onclick="switchManageTab('journal')">Journal</div>
-            </div>
-
-            <!-- HABITS SECTION -->
-            <div id="manage-habits-section">
-                <span class="section-title">Active Habits</span>
-                <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Tap on any habit to Edit details.</p>
-                <div id="manage-list"></div>
-            </div>
-
-            <!-- JOURNAL SECTION -->
-            <div id="manage-journal-section" style="display:none;">
-                <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
-                    <div class="input-group">
-                        <label>Journal Date</label>
-                        <input type="date" id="journal-date-input" onchange="loadJournalEntry()">
-                    </div>
-                    <textarea id="journal-text" rows="6" placeholder="Write your thoughts... (How was your day?)"
-                        style="width:100%; resize:none;"></textarea>
-                    <button class="btn-primary" onclick="saveJournalEntry()">Save Entry</button>
-                </div>
-
-                <span class="section-title">Recent Entries</span>
-                <div id="journal-history" class="glass-panel" style="min-height:100px;"></div>
-            </div>
 
         </div>
     </div>
@@ -1283,6 +1285,7 @@
 
             document.getElementById('manage-habits-section').style.display = tab === 'habits' ? 'block' : 'none';
             document.getElementById('manage-journal-section').style.display = tab === 'journal' ? 'block' : 'none';
+            document.getElementById('manage-events-section').style.display = tab === 'events' ? 'block' : 'none';
             document.getElementById('manage-events-section').style.display = tab === 'events' ? 'block' : 'none';
 
             if (tab === 'journal') {
