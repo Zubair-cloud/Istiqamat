@@ -93,15 +93,15 @@ class WidgetFactory(private val context: Context) : RemoteViewsService.RemoteVie
             // Ideally map "ph-mosque" to a drawable resource if available, or just use default
             
             if (item.isCompleted) {
-                views.setImageViewResource(R.id.widget_item_check, android.R.drawable.checkbox_on_background)
-                // White tint for visibility on dark background when checked
-                views.setInt(R.id.widget_item_check, "setColorFilter", 0xFFFFFFFF.toInt())
+                views.setImageViewResource(R.id.widget_item_check, R.drawable.ic_widget_checked)
+                // No tint needed, drawable has colors
+                views.setInt(R.id.widget_item_check, "setColorFilter", 0) 
                 views.setInt(R.id.widget_item_title, "setPaintFlags", android.graphics.Paint.STRIKE_THRU_TEXT_FLAG or android.graphics.Paint.ANTI_ALIAS_FLAG)
                 views.setTextColor(R.id.widget_item_title, 0xFFAAAAAA.toInt())
             } else {
-                views.setImageViewResource(R.id.widget_item_check, android.R.drawable.checkbox_off_background)
-                // Neon Green tint for unchecked
-                views.setInt(R.id.widget_item_check, "setColorFilter", 0xFF00FF8C.toInt())
+                views.setImageViewResource(R.id.widget_item_check, R.drawable.ic_widget_unchecked)
+                // No tint needed
+                views.setInt(R.id.widget_item_check, "setColorFilter", 0)
                 views.setInt(R.id.widget_item_title, "setPaintFlags", android.graphics.Paint.ANTI_ALIAS_FLAG)
                 views.setTextColor(R.id.widget_item_title, 0xFFFFFFFF.toInt())
             }
