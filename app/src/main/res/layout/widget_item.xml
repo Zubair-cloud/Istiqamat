@@ -45,7 +45,6 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:src="@android:drawable/checkbox_off_background"
-        android:tint="#00FF8C"
         android:contentDescription="Check" />
 
 </LinearLayout>
