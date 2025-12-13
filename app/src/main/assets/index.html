@@ -817,15 +817,52 @@
             top: 20px;
         }
     </style>
+
+    <style>
+    /* VISUAL REVAMP OVERRIDES */
+    :root {
+        --bg-dark: #050816;
+        --neon-primary: #00ff8c;
+        --neon-secondary: #00f5ff;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --card-radius: 20px;
+    }
+    
+    body {
+        background: var(--bg-dark); /* Fallback */
+        background-image: var(--liquid-gradient, linear-gradient(135deg, #050816 0%, #1a1f3c 100%));
+        background-attachment: fixed;
+    }
+    
+    .glass-panel {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Shop Item Visuals */
+    .shop-item-icon {
+        font-size: 2rem;
+        margin-right: 15px;
+        filter: drop-shadow(0 0 5px currentColor);
+    }
+    </style>
+    
 </head>
 
 <body>
 
     <!-- DASHBOARD -->
     <div id="home-screen" class="screen active">
-        <header class="app-header">
-            <div class="user-greeting">
-                <p>Assalamu Alaikum,</p>
+        <header class="app-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
+            <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                 <h2 id="app-title-text" style="margin:0; font-size:1.5rem; font-weight:800; background:linear-gradient(to right, var(--neon-primary), var(--neon-secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Stride</h2>
+                 <div class="points-badge"><i class="ph-fill ph-diamond"></i><span id="points-display">0</span></div>
+            </div>
+            <div class="user-greeting" style="width:100%;">
+                <p><span id="greeting-text">Good Morning</span>,</p>
                 <h1 class="display-name">User</h1>
             </div>
             <div class="points-badge"><i class="ph-fill ph-diamond"></i><span id="points-display">0</span></div>
@@ -883,6 +920,10 @@
                     <p>Shields Owned</p>
                 </div>
             </div>
+            
+            <span class="section-title" style="margin-top:20px;">Themes & Customization</span>
+            <div id="shop-container"></div>
+            
 
             <span class="section-title">Power-ups</span>
             <div class="glass-panel shop-item">
@@ -2027,6 +2068,24 @@
         }
     }, 10000);
     
+    </script>
+    
+
+    <script>
+    // TITLE UPDATE HOOK
+    const oldRender = window.renderAll || function(){};
+    window.renderAll = function() {
+        if(oldRender) oldRender();
+        
+        // Update Title
+        const titleEl = document.getElementById('app-title-text');
+        if(titleEl && typeof getText === 'function') {
+            titleEl.innerText = getText('app_title');
+        }
+        
+        // Update Shop
+        if(typeof renderStore === 'function') renderStore();
+    }
     </script>
     
 </body>
