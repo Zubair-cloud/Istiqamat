@@ -1834,6 +1834,201 @@
     function switchTab(screenId, btn) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId + '-screen').classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); if(btn) btn.classList.add('active'); renderAll(); }
     function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
     </script>
+
+    <script>
+    // === SAFE INJECTION: STIDE, THEMES, AUTO-CLAIM ===
+    
+    // 1. INCLUSIVITY HELPER
+    function getText(key) {
+         const isIslamic = appData.settings ? (appData.settings.islamicMode || false) : false;
+         switch(key) {
+             case 'greeting': 
+                 const hr = new Date().getHours();
+                 if(isIslamic) return "Assalamu Alaikum";
+                 if(hr < 12) return "Good Morning";
+                 if(hr < 18) return "Good Afternoon";
+                 return "Good Evening";
+             case 'points_name': return isIslamic ? "Ajr" : "Points";
+             case 'app_title': return isIslamic ? "Istiqamat" : "Stride";
+             default: return "";
+         }
+    }
+
+    // 2. THEME SYSTEM
+    function applyTheme(themeName) {
+        appData.activeTheme = themeName;
+        const root = document.documentElement;
+        if(themeName === 'gold') {
+            root.style.setProperty('--bg-dark', '#0b0e31');
+            root.style.setProperty('--neon-primary', '#ffd700'); 
+            root.style.setProperty('--neon-secondary', '#ffec8b');
+            root.style.setProperty('--liquid-gradient', 'linear-gradient(to top, #0b0e31, #ffd700)');
+        } else if(themeName === 'red') {
+            root.style.setProperty('--bg-dark', '#2a0505'); 
+            root.style.setProperty('--neon-primary', '#ff4d4d');
+            root.style.setProperty('--neon-secondary', '#ff9999');
+            root.style.setProperty('--liquid-gradient', 'linear-gradient(to top, #500000, #ff4d4d)');
+        } else {
+            root.style.setProperty('--bg-dark', '#050816'); 
+            root.style.setProperty('--neon-primary', '#00ff8c');
+            root.style.setProperty('--neon-secondary', '#00f5ff');
+            root.style.setProperty('--liquid-gradient', 'linear-gradient(to top, #00bcd4, #00ff8c)');
+        }
+        document.body.style.background = "var(--bg-dark)"; 
+        if(typeof saveData === 'function') saveData();
+        if(typeof renderAll === 'function') renderAll();
+    }
+
+    // 3. STORE/SHOP (OVERRIDE)
+    // We redefine it to support themes.
+    window.renderStore = function() {
+        const container = document.getElementById('shop-container');
+        if(!container) return;
+        container.innerHTML = '';
+        
+        const themes = [
+            {id: 'theme_default', name: 'Neon Genesis', desc: 'Original Green', cost: 0, icon: 'ph-paint-brush', color: '#00ff8c'},
+            {id: 'theme_gold', name: 'Royal Gold', desc: 'Navy & Gold Luxury', cost: 100, icon: 'ph-crown', color: '#ffd700'},
+            {id: 'theme_red', name: 'Silky Red', desc: 'Deep Red & Gold', cost: 100, icon: 'ph-drop', color: '#ff4d4d'}
+        ];
+        
+        themes.forEach(t => {
+            const owned = t.cost === 0 || (appData.inventory && appData.inventory.includes(t.id));
+            const currentTheme = appData.activeTheme || 'default';
+            const active = (t.id === 'theme_default' && currentTheme === 'default') || 
+                           (currentTheme === t.id.replace('theme_', ''));
+            
+            let btnHtml = '';
+            if(active) {
+                btnHtml = `<button class="buy-btn" disabled style="background:#555; color:#fff;">Active</button>`;
+            } else if(owned) {
+                const realId = t.id === 'theme_default' ? 'default' : t.id.replace('theme_', '');
+                btnHtml = `<button class="buy-btn" onclick="applyTheme('${realId}')" style="background:var(--neon-secondary); color:#000;">Equip</button>`;
+            } else {
+                btnHtml = `<button class="buy-btn" onclick="buyItem('${t.id}', ${t.cost})">Buy ${t.cost} 💎</button>`;
+            }
+            
+            const html = `
+            <div class="glass-panel shop-item" style="margin-bottom:10px;">
+                <i class="ph-fill ${t.icon} shop-item-icon" style="color:${t.color};"></i>
+                <div>
+                    <h3>${t.name}</h3>
+                    <p style="color:#aaa; font-size:0.8rem;">${t.desc}</p>
+                </div>
+                ${btnHtml}
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    // 4. BUY ITEM (OVERRIDE/NEW)
+    window.buyItem = function(itemId, cost) {
+        if(appData.user.points >= cost) {
+            if(appData.inventory && appData.inventory.includes(itemId)) return showToast("Owned!");
+            appData.user.points -= cost;
+            if(!appData.inventory) appData.inventory = [];
+            appData.inventory.push(itemId);
+            if(itemId.startsWith('theme_')) applyTheme(itemId.replace('theme_', ''));
+            saveData(); renderAll(); showToast("Bought & Equipped!");
+        } else { showToast("Need more Points!"); }
+    }
+    
+    // 5. PROFILE INFO (OVERRIDE to use getText)
+    window.renderProfileInfo = function() {
+        document.querySelectorAll('.display-name').forEach(el => el.innerText = appData.user.name);
+         // Stride Inclusivity
+        const greetingEl = document.getElementById('greeting-text');
+        if(greetingEl) greetingEl.innerText = getText('greeting');
+        
+        document.getElementById('edit-name').value = appData.user.name;
+        document.getElementById('edit-tagline').value = appData.user.tagline;
+        const firstLetter = appData.user.name ? appData.user.name.charAt(0).toUpperCase() : '?';
+        document.getElementById('profile-avatar').innerText = firstLetter;
+    }
+    
+    // 6. DAILY CLAIM (NEW)
+    window.claimDailyPoints = function() {
+        appData.user.points += 50; 
+        appData.claimedToday = true;
+        saveData();
+        showToast("Day Completed! Points Secured. 🌙");
+    }
+
+    // 7. INITIALIZATION HOOK
+    const originalOnLoad = window.onload;
+    window.onload = function() {
+        if(originalOnLoad) originalOnLoad();
+        
+        // POST-LOAD MIGRATION
+        console.log("Running Safe Migration...");
+        
+        // Migration Fields
+        if(!appData.settings) appData.settings = {};
+        if(typeof appData.settings.islamicMode === 'undefined') appData.settings.islamicMode = false;
+        if(!appData.inventory) appData.inventory = [];
+        if(!appData.activeTheme) appData.activeTheme = 'default';
+        if(typeof appData.claimedToday === 'undefined') appData.claimedToday = false;
+        
+        // 500 Points Grant
+        if(appData.user.points < 500) appData.user.points = 500;
+        
+        // Apply Visuals
+        applyTheme(appData.activeTheme);
+        renderAll();
+        
+        // Helper: Add Islamic Mode Toggle to UI if missing
+        const settingsModal = document.getElementById('settings-modal');
+        if(settingsModal && !document.getElementById('setting-islamic-mode')) {
+             // Inject via DOM append
+             const group = document.createElement('div');
+             group.className = 'input-group';
+             group.style.display = 'flex'; 
+             group.style.alignItems = 'center'; 
+             group.style.gap = '10px';
+             group.innerHTML = `
+                <input type="checkbox" id="setting-islamic-mode" style="width:auto;">
+                <label for="setting-islamic-mode" style="margin:0; color:#fff;">Islamic Mode (Istiqamat)</label>
+             `;
+             // Insert before first input group
+             const firstGroup = settingsModal.querySelector('.input-group');
+             if(firstGroup) settingsModal.querySelector('.glass-panel').insertBefore(group, firstGroup);
+             
+             // Bind Change Event? or let saveGlobalSettings handle it.
+             // We need to override saveGlobalSettings too to read this checkbox!
+        }
+        
+        // Hide Manual Claim Button
+        const sec = document.getElementById('claim-section');
+        if(sec) sec.style.display = 'none';
+    }
+    
+    // 8. SAVE SETTINGS (OVERRIDE)
+    window.saveGlobalSettings = function() {
+         if(!appData.settings) appData.settings = {};
+         const isoMode = document.getElementById('setting-islamic-mode');
+         if(isoMode) appData.settings.islamicMode = isoMode.checked;
+         
+         const daily = document.getElementById('setting-daily-time');
+         if(daily) appData.settings.dailyCheckTime = daily.value;
+         
+         const streak = document.getElementById('setting-streak-time');
+         if(streak) appData.settings.streakWarningTime = streak.value;
+         
+         saveData();
+         renderAll();
+         showToast("Settings Saved");
+    }
+    
+    // 9. AUTO CLAIM INTERVAL
+    setInterval(() => {
+        const now = new Date();
+        if(now.getHours() === 23 && now.getMinutes() === 59) {
+             if(!appData.claimedToday) claimDailyPoints();
+        }
+    }, 10000);
+    
+    </script>
+    
 </body>
 
 </html>
