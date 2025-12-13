@@ -898,12 +898,8 @@
 
     <!-- DASHBOARD -->
     <div id="home-screen" class="screen active">
-        <header class="app-header" style="flex-direction:column; align-items:flex-start; gap:10px;">
-            <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
-                 <h2 id="app-title-text" style="margin:0; font-size:1.5rem; font-weight:800; background:linear-gradient(to right, var(--neon-primary), var(--neon-secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Stride</h2>
-                 <div class="points-badge"><i class="ph-fill ph-diamond"></i><span id="points-display">0</span></div>
-            </div>
-            <div class="user-greeting" style="width:100%;">
+        <header class="app-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="user-greeting">
                 <p><span id="greeting-text">Good Morning</span>,</p>
                 <h1 class="display-name">User</h1>
             </div>
@@ -2128,6 +2124,48 @@
         // Update Shop
         if(typeof renderStore === 'function') renderStore();
     }
+    </script>
+    
+
+    <script>
+    // FINAL POLISH SCRIPT
+    (function() {
+        // Override applyTheme to force pure colors
+        const originalApply = window.applyTheme;
+        window.applyTheme = function(themeName) {
+            // Apply standard logic
+            if(themeName === 'gold') {
+                document.documentElement.style.setProperty('--neon-primary', '#FFD700');
+                document.documentElement.style.setProperty('--neon-secondary', '#FFA500');
+                // Force pure gradient
+                document.documentElement.style.setProperty('--liquid-gradient', 'linear-gradient(to top, #FFD700, #FFA500)');
+                document.body.style.backgroundImage = 'linear-gradient(135deg, #1a1600 0%, #332b00 100%)';
+            } else if (themeName === 'red') {
+                document.documentElement.style.setProperty('--neon-primary', '#FF0033'); 
+                document.documentElement.style.setProperty('--neon-secondary', '#CC0000');
+                document.documentElement.style.setProperty('--liquid-gradient', 'linear-gradient(to top, #FF0033, #880000)');
+                document.body.style.backgroundImage = 'linear-gradient(135deg, #2b0000 0%, #4d0000 100%)';
+            } else {
+                 // Default Neon
+                 document.documentElement.style.setProperty('--neon-primary', '#00ff8c');
+                 document.documentElement.style.setProperty('--neon-secondary', '#00f5ff');
+                 document.documentElement.style.setProperty('--liquid-gradient', 'linear-gradient(to top, #00f5ff, #00ff8c)');
+            }
+            // Save
+            if(appData) {
+                appData.activeTheme = themeName;
+                saveData();
+            }
+            renderAll(); // Re-render logic
+        };
+        
+        // Re-apply current theme on load
+        setTimeout(() => {
+            if(appData && appData.activeTheme) {
+                applyTheme(appData.activeTheme);
+            }
+        }, 500);
+    })();
     </script>
     
 </body>
