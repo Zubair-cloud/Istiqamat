@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- REFERENCE UI STYLES --- */
+:root {
+  --bg-dark: #050816;
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --neon-green: #00ff8c;
+  --neon-cyan: #00f5ff;
+  --neon-orange: #ff9e00;
+  --neon-purple: #bd00ff;
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --danger: #ff4b4b;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-dark);
+  background-image:
+      radial-gradient(circle at 10% 20%, rgba(0, 245, 255, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 90% 60%, rgba(189, 0, 255, 0.1) 0%, transparent 40%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--text-main);
+  min-height: 100vh;
+  padding-bottom: 100px; /* Space for Nav */
+}
+
+/* UTILS */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* HEADER */
+.app-header {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-greeting h1 { font-size: 1.2rem; font-weight: 700; }
+.user-greeting p { font-size: 0.85rem; color: var(--text-muted); }
+
+.points-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 50px;
+  background: rgba(0, 255, 140, 0.1);
+  border: 1px solid rgba(0, 255, 140, 0.3);
+  color: var(--neon-green); font-weight: bold; font-size: 0.9rem;
+}
+
+/* STREAK HERO */
+.streak-hero-container { display: flex; justify-content: center; margin-top: 10px; }
+.streak-hero-badge {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255, 158, 0, 0.1);
+  border: 1px solid rgba(255, 158, 0, 0.4);
+  padding: 10px 25px; border-radius: 20px;
+  box-shadow: 0 0 20px rgba(255, 158, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+.streak-count-big { font-size: 1.5rem; font-weight: 800; color: #fff; text-shadow: 0 0 10px var(--neon-orange); }
+.streak-label-small { font-size: 0.8rem; color: #ffcc80; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+.fire-anim {
+  font-size: 1.8rem; color: var(--neon-orange);
+  filter: drop-shadow(0 0 10px var(--neon-orange));
+  animation: flicker 1.5s infinite alternate;
+}
+@keyframes flicker { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.1); opacity: 0.8; } }
+
+/* FLUID VESSEL */
+.vessel-section { display: flex; justify-content: center; padding: 30px 0 40px 0; }
+.container-wrap { transform: scale(0.9); transform-origin: center; }
+.glass-container {
+  position: relative; width: 200px; height: 280px; border-radius: 40px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
+  overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
+}
+.glass-container::after {
+  content: ''; position: absolute; inset: 0; border-radius: 40px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); pointer-events: none; z-index: 5;
+}
+/* FLUID & PARTICLES (Real Liquid Look) */
+.fluid {
+  position: relative; width: 100%; height: 10%;
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(180deg, #00C6FF 0%, #0072FF 100%); /* Deep Water Gradient */
+  box-shadow: 0 0 30px rgba(0, 198, 255, 0.5), inset 0 0 20px rgba(0, 50, 255, 0.3);
+  overflow: hidden;
+}
+.fluid::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+  filter: blur(2px); z-index: 2;
+}
+.fluid::after { /* Shiny reflection */
+  content: ''; position: absolute; top: 5px; left: 10%; width: 20px; height: 10px;
+  background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(4px);
+}
+
+/* PARTICLES */
+.particle {
+  position: absolute; bottom: -10px;
+  width: 8px; height: 8px; background: rgba(255,255,255,0.4);
+  filter: blur(1px);
+  border-radius: 50%;
+  animation: floatUp 4s infinite ease-in;
+  pointer-events: none;
+}
+.particle:nth-child(1) { left: 20%; animation-delay: 0s; transform: scale(0.6); }
+.particle:nth-child(2) { left: 50%; animation-delay: 1.5s; transform: scale(1); }
+.particle:nth-child(3) { left: 80%; animation-delay: 2.5s; transform: scale(0.8); }
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.5; }
+  100% { transform: translateY(-250px); opacity: 0; }
+}
+
+/* HABIT CARDS (Refined) */
+.content-area { padding: 0 24px; }
+.section-title {
+  font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;
+  color: var(--text-muted); margin: 25px 0 15px 0; display: block; font-weight: 600;
+}
+.date-indicator {
+  text-align: center; margin-bottom: 10px; color: var(--neon-cyan);
+  font-size: 0.85rem; background: rgba(0, 245, 255, 0.05); display: inline-block;
+  padding: 6px 18px; border-radius: 20px; border: 1px solid rgba(0, 245, 255, 0.15);
+  font-weight: 600; letter-spacing: 0.5px;
+}
+.habit-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px; margin-bottom: 14px; position: relative; overflow: hidden; 
+  transition: transform 0.1s, background 0.2s;
+  background: rgba(255,255,255,0.02);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.habit-card:active { transform: scale(0.98); }
+
+/* Completed State - Clean & Distinct */
+.habit-card.completed {
+  background: rgba(0, 255, 140, 0.05);
+  border: 1px solid rgba(0, 255, 140, 0.2);
+}
+.habit-card.completed .habit-title { 
+  text-decoration: line-through; color: var(--text-muted); opacity: 0.8;
+}
+
+/* Checkbox specific: Black Tick on Green Background */
+.checkbox-btn {
+  width: 32px !important; height: 32px !important; border-radius: 10px !important;
+  border: 2px solid rgba(255,255,255,0.2) !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  transition: all 0.2s;
+  color: transparent !important; /* Hide tick initially */
+  background: transparent !important;
+}
+.habit-card.completed .checkbox-btn {
+  background: var(--neon-green) !important;
+  border-color: var(--neon-green) !important;
+  color: #000 !important; /* BLACK TICK */
+  box-shadow: 0 0 15px rgba(0, 255, 140, 0.6) !important;
+  transform: scale(1.1);
+}
+.habit-card.completed .checkbox-btn i {
+  font-weight: 900 !important; /* Make tick bold */
+  color: #000 !important;
+}
+
+/* New Settings Buttons */
+.glass-btn-vertical {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  padding: 15px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.glass-btn-vertical:active { transform: scale(0.95); background: rgba(255,255,255,0.08); }
+.glass-btn-vertical span { font-size: 0.8rem; font-weight: 600; color: #fff; }
+.icon-circle {
+  width: 45px; height: 45px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin-bottom: 2px;
+}
+
+/* MANAGE & PROFILE */
+.heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 10px; }
+.heat-box { width: 100%; aspect-ratio: 1; background: rgba(255, 255, 255, 0.05); border-radius: 6px; }
+.heat-box.today { border: 1px solid #fff; }
+.avatar-lg { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #00c6ff, #0072ff); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; }
+.profile-input { background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.2); color: white; text-align: center; }
+.manage-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.manage-tab { flex: 1; padding: 12px; text-align: center; border-radius: 16px; background: rgba(255, 255, 255, 0.05); font-weight: 600; font-size: 0.9rem; }
+.manage-tab.active { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px rgba(0,245,255,0.3); }
+

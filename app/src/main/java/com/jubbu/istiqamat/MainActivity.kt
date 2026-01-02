@@ -11,15 +11,52 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
+import android.webkit.ValueCallback
+import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
+import android.webkit.ValueCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import android.view.View
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var notificationHelper: NotificationHelper
+    private var fileUploadCallback: ValueCallback<Array<Uri>>? = null
+
+    private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            result.data?.data?.let { uri ->
+                fileUploadCallback?.onReceiveValue(arrayOf(uri))
+            } ?: run {
+                fileUploadCallback?.onReceiveValue(null)
+            }
+        } else {
+            fileUploadCallback?.onReceiveValue(null)
+        }
+        fileUploadCallback = null
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Enable Edge-to-Edge and Handle Insets
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(
+                left = bars.left,
+                top = bars.top,
+                right = bars.right,
+                bottom = bars.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
 
         notificationHelper = NotificationHelper(this)
 
@@ -36,7 +73,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webViewClient = WebViewClient()
-        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowFileChooser(
+                webView: WebView?,
+                filePathCallback: ValueCallback<Array<Uri>>?,
+                fileChooserParams: FileChooserParams?
+            ): Boolean {
+                fileUploadCallback?.onReceiveValue(null)
+                fileUploadCallback = filePathCallback
+
+                val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/json" // Limit to JSON
+                }
+                fileChooserLauncher.launch(intent)
+                return true
+            }
+        }
 
         // Add JavaScript interface for tab detection
         webView.addJavascriptInterface(WebAppInterface(), "Android")
