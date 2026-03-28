@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      
+      // 1. User Account Ownership Lock
+      // Koi bhi doosra insaan/hacker is file ko dekh ya chhu nahi sakta sivaye asli Malik ke.
+      allow read, create: if request.auth != null && request.auth.uid == userId;
+      
+      // 2. The Ultimate Economy Shield (50 Points Jump Limit)
+      // Agar kisi script ne ek dum se 51 ya 1000 points bhejne ki koshish ki, toh Firebase use reject kar dega.
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId
+                    && (
+                      // Ya toh points update na ho rahe hon
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points']) 
+                      // Ya agar ho rahe hain, toh puraane points aur naye points ka difference 50 se zyada na ho
+                      || (request.resource.data.points - resource.data.points) <= 50
+                    );
+    }
+  }
+}

@@ -19,3 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepclassmembers class com.zinclabs.istiqamat.MainActivity$WebAppInterface {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+-keep class com.zinclabs.istiqamat.NotificationReceiver
+-keep class com.zinclabs.istiqamat.IstiqamatWidget
+-keep class com.zinclabs.istiqamat.WidgetService
+-keep class com.zinclabs.istiqamat.WidgetFactory

@@ -1,15 +1,22 @@
+// --- HELPER FUNC ---
+function getLocalDateStr() {
+    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, -1);
+    return localISOTime.split('T')[0];
+}
+
 // --- APP STATE ---
 let appData = {
-    user: { name: "Jubbu", tagline: "Consistent Believer", points: 0, shields: 0 },
+    user: { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', unlocked_modes: ['normal'], unlocked_themes: ['default'] },
     habits: [
-        { id: 1, title: "Fajr Namaz", icon: "ph-mosque", type: "simple", streak: 0, time: "05:30" },
-        { id: 2, title: "Drink Water", icon: "ph-drop", type: "counter", streak: 0, target: 8, time: "" }
+        { id: 1001, title: "Morning Meditation", icon: "ph-brain", type: "simple", streak: 0, time: "06:00" },
+        { id: 1002, title: "Hydrate", icon: "ph-drop", type: "counter", streak: 0, target: 8, time: "" }
     ],
     habitLogs: {},
-    journal: {}, // Format: "YYYY-MM-DD": "Journal text"
+    journal: {}, 
     history: [],
-    lastLoginDate: new Date().toISOString().split('T')[0],
-    currentDate: new Date().toISOString().split('T')[0]
+    lastLoginDate: getLocalDateStr(),
+    currentDate: getLocalDateStr()
 };
 
 // --- DATA FUNCTIONS ---
@@ -19,19 +26,25 @@ function loadData() {
         appData = JSON.parse(saved);
         if (!appData.habitLogs) appData.habitLogs = {};
         if (!appData.journal) appData.journal = {};
-        if (!appData.currentDate) appData.currentDate = new Date().toISOString().split('T')[0];
+        
+        // Critical Bug Fix: Always override loaded currentDate with the actual REAL date today
+        appData.currentDate = getLocalDateStr();
     }
 }
 
 function saveData() {
     appData.lastLoginDate = appData.currentDate;
     localStorage.setItem('istiqamat_data_v3', JSON.stringify(appData));
+    
+    // Sync Widget Data to Android
+    if (typeof window.Android !== 'undefined' && typeof window.Android.syncData === 'function') {
+        window.Android.syncData(JSON.stringify(appData));
+    }
 }
 
 function addHistory(desc, amount) {
     appData.history.unshift({ desc, amount, date: appData.currentDate });
     if (appData.history.length > 20) appData.history.pop();
-    saveData();
 }
 
 function checkMissedDays(lastDateStr, newDateStr) {
@@ -41,7 +54,8 @@ function checkMissedDays(lastDateStr, newDateStr) {
     let loopDate = new Date(last.getTime());
 
     while (loopDate < curr) {
-        const dateStr = loopDate.toISOString().split('T')[0];
+        const d = loopDate;
+        const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
         processDayEnd(dateStr);
         loopDate = new Date(loopDate.getTime() + oneDay);
     }
@@ -50,13 +64,26 @@ function checkMissedDays(lastDateStr, newDateStr) {
 function processDayEnd(dateStr) {
     let shieldUsedForDay = false;
     let habitsMissed = false;
+    let habitsDone = 0;
+    const totalHabits = appData.habits.length;
 
     for (const h of appData.habits) {
         const logKey = `${dateStr}-${h.id}`;
         const log = appData.habitLogs[logKey];
         if (!(log && log.completed)) {
             habitsMissed = true;
-            break;
+        } else {
+            habitsDone++;
+        }
+    }
+
+    if (totalHabits > 0 && habitsDone > 0) {
+        let earnedPoints = Math.ceil((habitsDone / totalHabits) * 10);
+        appData.user.points += earnedPoints;
+        addHistory(`Daily Points (${dateStr})`, earnedPoints);
+
+        if (window.Android && window.Android.uploadDailySync) {
+            window.Android.uploadDailySync(earnedPoints, appData.user.points, habitsDone, appData.user.streak || 0);
         }
     }
 

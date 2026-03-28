@@ -4,12 +4,28 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Istiqamat - The Steadfast</title>
+    <title>Steadfast</title>
 
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Offline Fonts & Icons Payload -->
+    <link rel="stylesheet" href="vendor/css/offline.css">
 
-        <link rel="stylesheet" href="css/themes/default.css">
+    <!-- GSAP for Smooth Animations -->
+    <script src="vendor/js/gsap.min.js"></script>
+    <script src="vendor/js/ScrollTrigger.min.js"></script>
+
     <link rel="stylesheet" href="css/styles.css">
+    <link id="theme-link" rel="stylesheet" href="css/themes/default.css">
+
+    <style>
+        .shop-glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+        }
+    </style>
 </head>
 
 <body>
@@ -18,10 +34,10 @@
     <div id="home-screen" class="screen active">
         <header class="app-header">
             <div class="user-greeting">
-                <p>Assalamu Alaikum,</p>
+                <p>Hello, Achiever</p>
                 <h1 class="display-name">Jubbu</h1>
             </div>
-            <div class="points-badge"><i class="ph-fill ph-diamond"></i><span id="points-display">0</span></div>
+            <div class="points-badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--neon-cyan)" viewBox="0 0 256 256" style="vertical-align:middle;"><path d="M246,98.73l-56-64A8,8,0,0,0,184,32H72a8,8,0,0,0-6,2.73l-56,64a8,8,0,0,0,.17,10.73l112,120a8,8,0,0,0,11.7,0l112-120A8,8,0,0,0,246,98.73ZM222.37,96H180L144,48h36.37ZM74.58,112l30.13,75.33L34.41,112Zm89.6,0L128,202.46,91.82,112ZM96,96l32-42.67L160,96Zm85.42,16h40.17l-70.3,75.33ZM75.63,48H112L76,96H33.63Z"></path></svg><span id="points-display">0</span></div>
         </header>
 
         <div class="streak-hero-container">
@@ -55,54 +71,40 @@
         </div>
     </div>
 
-    <!-- SHOP SCREEN -->
+    <!-- SHOP SECTION -->
     <div id="shop-screen" class="screen">
         <header class="app-header">
-            <h1>Marketplace</h1>
-            <div class="points-badge profile-points-display">0 💎</div>
+            <h2>Marketplace</h2>
+            <div class="points-badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--neon-cyan)" viewBox="0 0 256 256" style="vertical-align:middle;"><path d="M246,98.73l-56-64A8,8,0,0,0,184,32H72a8,8,0,0,0-6,2.73l-56,64a8,8,0,0,0,.17,10.73l112,120a8,8,0,0,0,11.7,0l112-120A8,8,0,0,0,246,98.73ZM222.37,96H180L144,48h36.37ZM74.58,112l30.13,75.33L34.41,112Zm89.6,0L128,202.46,91.82,112ZM96,96l32-42.67L160,96Zm85.42,16h40.17l-70.3,75.33ZM75.63,48H112L76,96H33.63Z"></path></svg><span class="profile-points-display">0</span>
+            </div>
         </header>
-        <div class="content-area">
 
-            <!-- Wallet Card -->
-            <div class="glass-panel wallet-card">
-                <div class="wallet-stat">
-                    <h2 id="shop-total-points">0</h2>
-                    <p>Ajr Points</p>
-                </div>
-                <div style="height:40px; width:1px; background:rgba(255,255,255,0.2);"></div>
-                <div class="wallet-stat">
-                    <h2 id="shop-total-shields" style="color:var(--neon-cyan); text-shadow:0 0 10px var(--neon-cyan);">0
-                    </h2>
-                    <p>Shields Owned</p>
-                </div>
+        <div class="scroll-content" style="padding-bottom:80px;">
+
+            <div id="shop-items-container">
+                <!-- Populated by JS -->
             </div>
 
-            <span class="section-title">Power-ups</span>
-            <div class="glass-panel shop-item">
-                <i class="ph-fill ph-shield-check shop-item-icon"></i>
-                <h3 style="font-size:1.2rem; margin-bottom:5px;">Streak Shield</h3>
-                <p style="color:#aaa; font-size:0.85rem; margin-bottom:15px;">Prevents your streak from breaking if you
-                    miss a day.</p>
-                <button class="buy-btn" onclick="buyShield()">
-                    Buy for 500 💎
-                </button>
+            <h3 class="section-title" style="margin-top:30px;">History</h3>
+            <div id="history-list">
+                <!-- Populated by JS -->
             </div>
-
-            <span class="section-title" style="margin-top:30px;">Transaction History</span>
-            <div class="glass-panel" style="padding:15px; min-height:100px;">
-                <div id="history-list">
-                    <p style="text-align:center; color:#666; font-size:0.8rem;">No transactions yet.</p>
-                </div>
-            </div>
-
         </div>
+        <nav class="bottom-nav">
+            <div class="nav-item" onclick="switchTab('home', this)"><i class="ph-bold ph-house"></i></div>
+            <div class="nav-item active" onclick="switchTab('shop', this)"><i class="ph-bold ph-storefront"></i></div>
+            <div class="fab-wrapper">
+                <div class="fab" onclick="openAddModal()"><i class="ph-bold ph-plus"></i></div>
+            </div>
+            <div class="nav-item" onclick="switchTab('manage', this)"><i class="ph-bold ph-list-checks"></i></div>
+            <div class="nav-item" onclick="switchTab('profile', this)"><i class="ph-bold ph-user"></i></div>
+        </nav>
     </div>
-
     <!-- MANAGE SCREEN -->
     <div id="manage-screen" class="screen">
         <header class="app-header">
             <h1>Manage</h1>
-            <div class="points-badge profile-points-display">0 💎</div>
+            <div class="points-badge profile-points-display">0 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--neon-cyan)" viewBox="0 0 256 256" style="vertical-align:middle;"><path d="M246,98.73l-56-64A8,8,0,0,0,184,32H72a8,8,0,0,0-6,2.73l-56,64a8,8,0,0,0,.17,10.73l112,120a8,8,0,0,0,11.7,0l112-120A8,8,0,0,0,246,98.73ZM222.37,96H180L144,48h36.37ZM74.58,112l30.13,75.33L34.41,112Zm89.6,0L128,202.46,91.82,112ZM96,96l32-42.67L160,96Zm85.42,16h40.17l-70.3,75.33ZM75.63,48H112L76,96H33.63Z"></path></svg></div>
         </header>
         <div class="content-area">
 
@@ -114,17 +116,7 @@
             <!-- HABITS SECTION -->
             <div id="manage-habits-section">
                 <!-- Time Travel / Debug Section -->
-                <span class="section-title">Time Travel (Testing)</span>
-                <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
-                    <p style="color:#aaa; font-size:0.8rem; margin-bottom:10px;">
-                        Change date to simulate future or past.
-                    </p>
-                    <div class="input-group">
-                        <label>Simulate Date</label>
-                        <input type="date" id="simulated-date-input" onchange="handleDateChange()">
-                    </div>
-                    <button class="btn-primary" onclick="resetToToday()">Back to Today</button>
-                </div>
+
 
                 <span class="section-title">Active Habits</span>
                 <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">Tap on any habit to Edit details.</p>
@@ -133,18 +125,25 @@
 
             <!-- JOURNAL SECTION -->
             <div id="manage-journal-section" style="display:none;">
-                <div class="glass-panel" style="padding:20px; margin-bottom:20px;">
+                <h3 class="section-title">Write Entry</h3>
+                <div class="glass-panel" style="padding:20px; border-radius:24px; margin-bottom:30px;">
                     <div class="input-group">
-                        <label>Journal Date</label>
-                        <input type="date" id="journal-date-input" onchange="loadJournalEntry()">
+                        <label
+                            style="color:#aaa; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; display:block;">Date</label>
+                        <input type="date" id="journal-date-input" onchange="loadJournalEntry()" class="styled-input">
                     </div>
-                    <textarea id="journal-text" rows="6" placeholder="Write your thoughts... (How was your day?)"
-                        style="width:100%; resize:none;"></textarea>
-                    <button class="btn-primary" onclick="saveJournalEntry()">Save Entry</button>
+                    <div class="input-group" style="margin-top:20px;">
+                        <label
+                            style="color:#aaa; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; display:block;">Thoughts</label>
+                        <textarea id="journal-text" rows="8" placeholder="How was your day?..." class="styled-input"
+                            style="font-family: 'Pacifico', cursive; font-size: 1.1rem; line-height: 1.6;"></textarea>
+                    </div>
+                    <button class="btn-primary neon-glow" onclick="saveJournalEntry()"
+                        style="margin-top:20px; border-radius:15px;">Save Journal 📔</button>
                 </div>
 
-                <span class="section-title">Recent Entries</span>
-                <div id="journal-history" class="glass-panel" style="min-height:100px;"></div>
+                <h3 class="section-title">Recent Entries</h3>
+                <div id="journal-history" style="display:flex; flex-direction:column; gap:10px;"></div>
             </div>
 
         </div>
@@ -155,7 +154,7 @@
         <header class="app-header">
             <h1>Profile</h1>
             <div style="display:flex; gap:10px;">
-                <div class="points-badge profile-points-display">0 💎</div>
+                <div class="points-badge profile-points-display">0 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--neon-cyan)" viewBox="0 0 256 256" style="vertical-align:middle;"><path d="M246,98.73l-56-64A8,8,0,0,0,184,32H72a8,8,0,0,0-6,2.73l-56,64a8,8,0,0,0,.17,10.73l112,120a8,8,0,0,0,11.7,0l112-120A8,8,0,0,0,246,98.73ZM222.37,96H180L144,48h36.37ZM74.58,112l30.13,75.33L34.41,112Zm89.6,0L128,202.46,91.82,112ZM96,96l32-42.67L160,96Zm85.42,16h40.17l-70.3,75.33ZM75.63,48H112L76,96H33.63Z"></path></svg></div>
                 <i class="ph-fill ph-gear" style="font-size:1.5rem; color:var(--text-muted); cursor:pointer;"
                     onclick="openSettingsModal()"></i>
             </div>
@@ -292,9 +291,23 @@
         </div>
     </div>
 
+    <!-- GLASS CONFIRM/ALERT MODAL -->
+    <div class="modal-overlay" id="glass-dialog-overlay" style="z-index:9999;">
+        <div class="glass-panel add-modal" style="max-width:320px; text-align:center; padding:30px;">
+            <div id="glass-dialog-icon" style="margin-bottom:15px;"><i class="ph-fill ph-warning" style="font-size:2.5rem; color:var(--neon-cyan);"></i></div>
+            <h3 id="glass-dialog-title" style="margin-bottom:10px; font-size:1.1rem;">Are you sure?</h3>
+            <p id="glass-dialog-msg" style="color:#aaa; font-size:0.9rem; margin-bottom:25px;">This action cannot be undone.</p>
+            <div id="glass-dialog-buttons" style="display:flex; gap:10px; justify-content:center;">
+                <button id="glass-dialog-cancel" class="btn-primary" style="background:rgba(255,255,255,0.08); color:#fff; flex:1;" onclick="resolveGlassDialog(false)">Cancel</button>
+                <button id="glass-dialog-ok" class="btn-primary" style="flex:1;" onclick="resolveGlassDialog(true)">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"><span id="toast-msg">Success</span></div>
 
-        <script src="js/data.js"></script>
+    <script src="js/messages.js"></script>
+    <script src="js/data.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
 </body>

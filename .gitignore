@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Large backup files
+Istiqamat_Backup_Full_Offline.zip
+*.zip

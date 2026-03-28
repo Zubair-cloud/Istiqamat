@@ -1,29 +1,55 @@
 // --- UI RENDERING & DOM MANIPULATION ---
+const GEM_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256" style="vertical-align:middle;"><path d="M246,98.73l-56-64A8,8,0,0,0,184,32H72a8,8,0,0,0-6,2.73l-56,64a8,8,0,0,0,.17,10.73l112,120a8,8,0,0,0,11.7,0l112-120A8,8,0,0,0,246,98.73ZM222.37,96H180L144,48h36.37ZM74.58,112l30.13,75.33L34.41,112Zm89.6,0L128,202.46,91.82,112ZM96,96l32-42.67L160,96Zm85.42,16h40.17l-70.3,75.33ZM75.63,48H112L76,96H33.63Z"></path></svg>';
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+
+function vibrateDevice(duration = 50) {
+    if (window.Android && window.Android.vibrate) {
+        window.Android.vibrate(duration); // Try bridge first
+    } else if (navigator.vibrate) {
+        navigator.vibrate(duration); // Standard web API
+    }
+}
 
 function renderAll() {
-    renderProfileInfo();
-    renderHabits();
-    renderManageList();
-    renderShop();
-    renderJournalHistory();
-    updateLiquid();
-    updatePointsDisplay();
-    updateMainStreak();
+    try { renderProfileInfo(); } catch (e) { console.error("Error in renderProfileInfo:", e); }
+    try { renderHabits(); } catch (e) { console.error("Error in renderHabits:", e); }
+    try { renderManageList(); } catch (e) { console.error("Error in renderManageList:", e); }
+    try { renderRealShop(); } catch (e) { console.error("Error in renderRealShop:", e); }
+    try { renderTransactionHistory(); } catch (e) { console.error("Error in renderTransactionHistory:", e); }
+    try { renderJournalHistory(); } catch (e) { console.error("Error in renderJournalHistory:", e); }
+    try { updateLiquid(); } catch (e) { console.error("Error in updateLiquid:", e); }
+    try { updatePointsDisplay(); } catch (e) { console.error("Error in updatePointsDisplay:", e); }
+    try { updateMainStreak(); } catch (e) { console.error("Error in updateMainStreak:", e); }
     
     // Safety check for elements existing before trying to update them
-    if(document.getElementById('current-date-display')) 
-        document.getElementById('current-date-display').innerText = new Date(appData.currentDate).toDateString();
-    
-    if(document.getElementById('simulated-date-input'))
-        document.getElementById('simulated-date-input').value = appData.currentDate;
+    try {
+        if(document.getElementById('current-date-display')) 
+            document.getElementById('current-date-display').innerText = new Date(appData.currentDate).toDateString();
+        
+        if(document.getElementById('simulated-date-input'))
+            document.getElementById('simulated-date-input').value = appData.currentDate;
+    } catch (e) { console.error("Error in date displays:", e); }
     
     // Load current journal
-    if(typeof loadJournalEntry === 'function') loadJournalEntry(); // In app.js or UI? Decided to keep loadJournalEntry in ui.js? 
-    // Wait, loadJournalEntry reads DOM and sets DOM, so it fits here. I will include it below.
-    else loadJournalEntryUI();
+    try {
+        if(typeof loadJournalEntry === 'function') loadJournalEntry(); 
+        else loadJournalEntryUI();
+    } catch(e) { console.error("Error loading journal:", e); }
 
     // Update heatmap
-    renderHeatmap();
+    try { renderHeatmap(); } catch (e) { console.error("Error in renderHeatmap:", e); }
 }
 
 function loadJournalEntryUI() {
@@ -44,7 +70,7 @@ function renderProfileInfo() {
 
 function updatePointsDisplay() {
     if(document.getElementById('points-display')) document.getElementById('points-display').innerText = appData.user.points;
-    document.querySelectorAll('.profile-points-display').forEach(el => el.innerText = appData.user.points + " 💎");
+    document.querySelectorAll('.profile-points-display').forEach(el => el.innerHTML = appData.user.points + ' ' + GEM_ICON);
     if(document.getElementById('shop-total-points')) document.getElementById('shop-total-points').innerText = appData.user.points;
     if(document.getElementById('shop-total-shields')) document.getElementById('shop-total-shields').innerText = appData.user.shields;
 }
@@ -55,14 +81,161 @@ function updateMainStreak() {
     if(document.getElementById('main-streak-count')) document.getElementById('main-streak-count').innerText = maxStreak;
 }
 
-function renderShop() {
+function switchTheme(themeName) {
+    const themeLink = document.getElementById('theme-link');
+    if (themeLink) themeLink.href = `css/themes/${themeName}.css`;
+    
+    // Persist if needed (appData is saved in buy/equip functions)
+}
+
+
+
+
+function renderRealShop() {
+    const container = document.getElementById('shop-items-container');
+    if(!container) return;
+    container.innerHTML = '';
+
+    // MODES DATA
+    const modes = [
+        { id: 'normal', name: 'Normal', price: 0, icon: 'sentiment_satisfied', desc: 'Standard encouraging vibes' },
+        { id: 'sarcastic', name: 'Sarcasm', price: 500, icon: 'sentiment_neutral', desc: 'Brutal honesty. Not for the weak.' },
+        { id: 'premium', name: 'Premium', price: 1000, icon: 'crown', desc: 'Elite motivation for achievers.' }
+    ];
+
+    let html = `<h2 class="section-title">Personalities</h2><div class="shop-list">`;
+    
+    modes.forEach(m => {
+        const isUnlocked = appData.user.unlocked_modes && appData.user.unlocked_modes.includes(m.id);
+        const isEquipped = appData.user.mode === m.id;
+        
+        let btnHtml = '';
+        if (isUnlocked && isEquipped) {
+            btnHtml = `<button class="btn-sm" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:8px 16px; border-radius:12px;">Active</button>`;
+        } else if (isUnlocked) {
+            btnHtml = `<button onclick="equipItem('mode', '${m.id}')" class="btn-sm" style="background:var(--neon-cyan); color:#000; font-weight:bold; padding:8px 16px; border-radius:12px; border:none; box-shadow:0 0 10px rgba(0,245,255,0.4);">Equip</button>`;
+        } else {
+            btnHtml = `<button onclick="buyItem('mode', '${m.id}', ${m.price})" class="btn-sm" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px 16px; border-radius:12px;">
+                Buy ${m.price} ${GEM_ICON}
+            </button>`;
+        }
+
+        html += `
+        <div class="shop-card-wide">
+            <div class="icon-box">
+                <span class="material-symbols-rounded" style="font-size:1.5rem; color:var(--neon-cyan);">${m.icon}</span>
+            </div>
+            <div class="content-box">
+                <h4 style="font-size:0.95rem; margin-bottom:2px;">${m.name}</h4>
+                <p style="font-size:0.7rem;">${m.desc}</p>
+            </div>
+            <div class="action-box">
+                ${btnHtml}
+            </div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    // POWER-UPS (GRID LAYOUT)
+    html += `<h2 class="section-title">Power-Ups</h2><div class="shop-grid">`;
+    
+    // Watch Ad (Updated Button to Cyan to avoid Green Bottom Clash)
+    const adLimitReached = appData.adWatchCount >= 2 && appData.adWatchDate === getLocalDateStr();
+    html += `
+        <div class="glass-panel shop-item" style="padding:15px; border-radius:24px;">
+            <div style="margin-bottom:10px;">
+                <span class="material-symbols-rounded" style="font-size:2.5rem; color:var(--neon-cyan);">play_circle</span>
+            </div>
+            <h4 style="color:#fff; font-size:1rem; margin-bottom:4px;">Watch Ad</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Earn +20 Points (${appData.adWatchCount || 0}/2 today)</p>
+            <button onclick="watchAdForPoints()" ${adLimitReached ? 'disabled' : ''} style="width:100%; padding:10px; border-radius:12px; background:${adLimitReached ? '#333' : 'var(--neon-cyan)'}; color:${adLimitReached ? '#777' : '#000'}; font-weight:bold; border:none; box-shadow:${adLimitReached ? 'none' : '0 0 10px rgba(0,245,255,0.4)'}; cursor:${adLimitReached ? 'not-allowed' : 'pointer'};">
+                ${adLimitReached ? 'Limit Reached' : 'Watch +20'} ${GEM_ICON}
+            </button>
+        </div>
+    `;
+
+    // Shield
+    html += `
+        <div class="glass-panel shop-item" style="padding:15px; border-radius:24px;">
+            <div style="margin-bottom:10px;">
+                <span class="material-symbols-rounded" style="font-size:2.5rem; color:var(--neon-green);">security</span>
+            </div>
+            <h4 style="color:#fff; font-size:1rem; margin-bottom:4px;">Streak Shield</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:12px;">Owned: ${appData.user.shields || 0}</p>
+            <button onclick="buyItem('powerup', 'shield', 500)" style="width:100%; padding:10px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); color:#fff; font-weight:bold;">
+                Buy 500 ${GEM_ICON}
+            </button>
+        </div>
+    `;
+    html += `</div>`;
+
+    // THEMES (FULL WIDTH / LIST LAYOUT)
+    html += `<h2 class="section-title">Themes</h2><div class="shop-list">`;
+    
+    const themes = [
+        { id: 'default', name: 'Classic Blue', desc: 'The original Steadfast vibe.', price: 0, icon: 'palette' },
+        { id: 'neon-gold', name: 'Neon Gold', desc: 'Royal Black & Liquid Gold.', price: 300, icon: 'trophy' },
+        { id: 'ruby-red', name: 'Ruby Red', desc: 'Deep Red & Intense Passion.', price: 300, icon: 'favorite' }
+    ];
+
+    themes.forEach(t => {
+        const isUnlocked = appData.user.unlocked_themes && appData.user.unlocked_themes.includes(t.id);
+        const isActive = appData.user.theme === t.id; // We need to store active theme in appData.user.theme if not already
+
+        let actionBtn = '';
+        if (isActive) {
+            actionBtn = `<div style="padding:6px 12px; background:rgba(255,255,255,0.1); border-radius:8px; font-size:0.75rem; color:#fff;">Active</div>`;
+        } else if (isUnlocked || t.price === 0) {
+            actionBtn = `<button onclick="equipItem('theme', '${t.id}')" style="padding:6px 12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); border-radius:8px; font-size:0.75rem; color:#fff; cursor:pointer;">Equip</button>`;
+        } else {
+            actionBtn = `<button onclick="buyItem('theme', '${t.id}', ${t.price})" style="padding:6px 12px; background:var(--neon-green); border-radius:8px; font-size:0.75rem; color:#000; font-weight:bold; cursor:pointer; border:none;">Buy ${t.price} ${GEM_ICON}</button>`;
+        }
+
+        html += `
+        <div class="shop-card-wide" style="display:flex; justify-content:space-between; align-items:center; padding:15px; border-radius:16px; margin-bottom:10px; background:var(--glass-bg); border:1px solid var(--glass-border);">
+            <div style="display:flex; align-items:center;">
+                <div class="icon-box" style="margin-right:15px;">
+                    <span class="material-symbols-rounded" style="font-size:1.8rem; color:${t.id === 'ruby-red' ? '#ff0033' : (t.id === 'neon-gold' ? '#ffd700' : 'var(--neon-cyan)')};">${t.icon}</span>
+                </div>
+                <div>
+                    <h4 style="color:#fff; font-size:0.95rem; margin-bottom:2px;">${t.name}</h4>
+                    <p style="color:#aaa; font-size:0.75rem;">${t.desc}</p>
+                </div>
+            </div>
+            <div>${actionBtn}</div>
+        </div>
+        `;
+    });
+    html += `</div>`;
+
+    container.innerHTML = html;
+    
+    // Trigger History Render
+    renderTransactionHistory();
+}
+
+function renderTransactionHistory() {
     const list = document.getElementById('history-list');
     if(!list) return;
     list.innerHTML = '';
-    if (appData.history.length === 0) { list.innerHTML = `<p style="text-align:center; color:#666; font-size:0.8rem;">No transactions yet.</p>`; return; }
-    appData.history.forEach(t => {
-        const isPos = t.amount >= 0;
-        const html = `<div class="history-item"><div class="hist-left"><i class="ph-bold ${isPos ? 'ph-arrow-up-right' : 'ph-arrow-down-left'}" style="color:${isPos ? 'var(--neon-green)' : 'var(--danger)'}"></i><div><p style="font-size:0.9rem;">${t.desc}</p><p style="font-size:0.7rem; color:#aaa;">${t.date}</p></div></div><span class="hist-pts ${isPos ? 'hist-plus' : 'hist-minus'}">${isPos ? '+' : ''}${t.amount}</span></div>`;
+    
+    const hist = appData.history || [];
+    if(hist.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#666; font-size:0.8rem;">No transactions yet.</p>';
+        return;
+    }
+    
+    // Show last 5
+    hist.slice(0, 5).forEach(item => {
+        const isPlus = item.amount > 0;
+        const color = isPlus ? 'var(--neon-green)' : 'var(--danger)';
+        const sign = isPlus ? '+' : '';
+        
+        const html = `
+        <div class="history-item" style="border-bottom:1px solid rgba(255,255,255,0.05); padding:10px 0;">
+            <div style="font-size:0.9rem; color:#fff;">${escapeHTML(item.desc)}</div>
+            <div style="font-weight:bold; color:${color}; font-size:0.9rem;">${sign}${item.amount} ${GEM_ICON}</div>
+        </div>`;
         list.insertAdjacentHTML('beforeend', html);
     });
 }
@@ -113,7 +286,7 @@ function renderHabits() {
     <div class="habit-info">
       <i class="ph-fill ${h.icon} habit-icon"></i>
       <div class="habit-text">
-        <h3>${h.title}</h3>
+        <h3>${escapeHTML(h.title)}</h3>
         <p>${timeDisplay} ${h.type === 'simple' ? (h.streak || 0) + ' Streak' : 'Daily Goal'}</p>
       </div>
     </div>
@@ -122,6 +295,10 @@ function renderHabits() {
 `;
         list.insertAdjacentHTML('beforeend', html);
     });
+
+
+    
+
 }
 
 function renderManageList() {
@@ -136,7 +313,7 @@ function renderManageList() {
         <div class="habit-info">
             <i class="ph-fill ${h.icon} habit-icon"></i>
             <div class="habit-text">
-                <h3>${h.title}</h3>
+                <h3>${escapeHTML(h.title)}</h3>
                 <p style="color:#aaa;">${h.type} ${timeText}</p>
             </div>
         </div>
@@ -160,10 +337,18 @@ function renderJournalHistory() {
 
     dates.slice(0, 5).forEach(date => {
         if (!appData.journal[date]) return;
+        const d = new Date(date);
+        const dateStr = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        
         const html = `
-        <div class="journal-entry">
-            <div class="journal-date">${new Date(date).toDateString()}</div>
-            <div class="journal-text">${appData.journal[date]}</div>
+        <div class="glass-panel" style="padding:15px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="color:var(--neon-cyan); font-weight:bold; font-size:0.9rem;">${dateStr}</div>
+                <i class="ph-bold ph-caret-right" style="color:#666;"></i>
+            </div>
+            <div style="font-size:0.9rem; color:#ddd; line-height:1.4; max-height:60px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                ${escapeHTML(appData.journal[date])}
+            </div>
         </div>
     `;
         list.insertAdjacentHTML('beforeend', html);
@@ -220,6 +405,7 @@ function renderHeatmap() {
 
 // --- NAVIGATION & MODALS ---
 function switchTab(screenId, btn) {
+    if (typeof vibrateDevice === 'function') vibrateDevice(30);
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     if(document.getElementById(screenId + '-screen'))
         document.getElementById(screenId + '-screen').classList.add('active');
@@ -231,6 +417,7 @@ function switchTab(screenId, btn) {
 }
 
 function switchManageTab(tab) {
+    if (typeof vibrateDevice === 'function') vibrateDevice(30);
     document.querySelectorAll('.manage-tab').forEach(t => t.classList.remove('active'));
     // Assuming 0 is habits, 1 is journal. Better selector would be robust but this works
     const tabs = document.querySelectorAll('.manage-tab');
@@ -251,19 +438,35 @@ function switchManageTab(tab) {
     }
 }
 
-function showToast(msg) {
+function showToast(keyOrMsg, params = {}) {
     const t = document.getElementById('toast');
     if(!t) return;
     const tMsg = document.getElementById('toast-msg');
+    
+    // Support raw messages (legacy) or keys
+    let msg = "";
+    if (typeof getMsg === 'function' && keyOrMsg.indexOf(' ') === -1 && keyOrMsg.indexOf('_') > -1) {
+        msg = getMsg(keyOrMsg, params);
+    } else {
+        msg = keyOrMsg;
+    }
+
     if(tMsg) tMsg.innerText = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
+
+    // Reset Animation
+    t.classList.remove('animating');
+    void t.offsetWidth; // Force Reflow
+    t.classList.add('animating');
 }
 
-function openAddModal() { if(document.getElementById('add-modal')) document.getElementById('add-modal').classList.add('open'); }
+function openAddModal() { 
+    if (typeof vibrateDevice === 'function') vibrateDevice(30);
+    if(document.getElementById('add-modal')) document.getElementById('add-modal').classList.add('open'); 
+}
 function closeAddModal() { if(document.getElementById('add-modal')) document.getElementById('add-modal').classList.remove('open'); }
 
 function openEditModal(id) {
+    if (typeof vibrateDevice === 'function') vibrateDevice(30);
     const h = appData.habits.find(x => x.id === id);
     if (!h) return;
 

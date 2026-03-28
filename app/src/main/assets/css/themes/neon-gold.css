@@ -1,0 +1,66 @@
+:root {
+    /* Royal Black Background - Much Darker */
+    --bg-main: radial-gradient(circle at top, #141000, #000000); 
+    
+    /* Neon Gold Accents - Vibrant but legible */
+    --neon-green: #ffdb4d; /* Bright Gold */
+    --neon-cyan: #ffaa00;  /* Orange Gold */
+    --neon-purple: #ffe55c; /* Pale Gold */
+    --danger: #ff4444;
+
+    /* Gold Glass - Visible on dark */
+    --glass-bg: rgba(30, 25, 5, 0.7); /* Darker, more opaque glass */
+    --glass-border: rgba(255, 215, 0, 0.3); /* More visible border */
+    --text-main: #ffffff;
+
+    /* Liquid Gold */
+    --fluid-bg: linear-gradient(to top, #b8860b, #ffd700, #fffacd);
+    --fluid-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+}
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+/* Force White Text on Cards */
+.glass-panel,
+.habit-card,
+.shop-card-wide {
+    color: #ffffff !important;
+}
+
+.glass-panel h3,
+.glass-panel h4,
+.habit-card h3,
+.shop-card-wide h4 {
+    color: #ffffff !important;
+}
+
+.glass-panel p,
+.habit-card p,
+.shop-card-wide p {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Specific Gold Adjustments */
+.points-badge {
+    color: #ffd700;
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.streak-hero-badge {
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+.nav-item.active i {
+    color: #ffd700;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+.fab {
+    background: linear-gradient(135deg, #ffd700, #b8860b);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
