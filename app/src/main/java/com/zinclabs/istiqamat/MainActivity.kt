@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     // AdMob Rewarded Ad variables
     private var rewardedAd: RewardedAd? = null
     // Use a test ad unit ID for development
-    private val AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
+    private val AD_UNIT_ID = "ca-app-pub-9699861906304785/6273892518"
     private var isLoadingAd = false
 
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         MobileAds.initialize(this) {}
         loadRewardedAd()
 
-        triggerSignInIfNeeded()
+        triggerSignInIfNeeded(false)
 
         notificationHelper = NotificationHelper(this)
 
@@ -119,6 +119,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         // WebView Settings (Engine Tuning) 🔧
+        webView.setBackgroundColor(android.graphics.Color.parseColor("#050816"))
+        webView.overScrollMode = View.OVER_SCROLL_NEVER
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         webView.settings.apply {
             javaScriptEnabled = true
@@ -354,10 +356,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun triggerSignInIfNeeded() {
+    private fun triggerSignInIfNeeded(force: Boolean = false) {
         if (auth.currentUser == null) {
-            val signInIntent = googleSignInClient.signInIntent
-            signInLauncher.launch(signInIntent)
+            if (force) {
+                val signInIntent = googleSignInClient.signInIntent
+                signInLauncher.launch(signInIntent)
+            }
         } else {
             syncUserWithFirestore(auth.currentUser?.uid, auth.currentUser?.email)
         }
@@ -366,6 +370,13 @@ class MainActivity : AppCompatActivity() {
     // JavaScript Interface
 
     inner class WebAppInterface {
+
+        @JavascriptInterface
+        fun triggerSignIn() {
+            runOnUiThread {
+                this@MainActivity.triggerSignInIfNeeded(true)
+            }
+        }
 
         @JavascriptInterface
         fun uploadDailySync(pointsEarned: Int, newTotalPoints: Int, habitsCompleted: Int, currentStreak: Int) {

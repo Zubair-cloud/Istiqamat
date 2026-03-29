@@ -8,7 +8,7 @@
     <!-- NEW: Notification permissions -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Removed USE_EXACT_ALARM to fix Play Store policy rejection risk -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     
@@ -26,7 +26,7 @@
         <!-- AdMob App ID (Test ID) -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-9699861906304785~8565013934"/>
 
         <!-- Fix Manifest Merger conflict between Firebase Analytics and AdMob -->
         <property

@@ -315,6 +315,16 @@ function saveProfile() {
 // --- TIME TRAVEL ---
 
 
+// --- CLOUD LOGIN ---
+function loginWithGoogle() {
+    if (window.Android && window.Android.triggerSignIn) {
+        window.Android.triggerSignIn();
+        showToast("Connecting...");
+    } else {
+        glassAlert("Cloud Sync is only available on the Android app.", "ph-fill ph-cloud-x");
+    }
+}
+
 // --- BACKUP / RESTORE ---
 function backupData() {
     const dataStr = JSON.stringify(appData);

@@ -492,6 +492,9 @@ function closeEditModal() { if(document.getElementById('edit-modal')) document.g
 function openSettingsModal() { if(document.getElementById('settings-modal')) document.getElementById('settings-modal').classList.add('open'); }
 function closeSettingsModal() { if(document.getElementById('settings-modal')) document.getElementById('settings-modal').classList.remove('open'); }
 
+function openLicensesModal() { if(document.getElementById('licenses-modal')) document.getElementById('licenses-modal').classList.add('open'); }
+function closeLicensesModal() { if(document.getElementById('licenses-modal')) document.getElementById('licenses-modal').classList.remove('open'); }
+
 function toggleTargetInput() {
     const typeEl = document.getElementById('new-habit-type');
     const group = document.getElementById('target-group');

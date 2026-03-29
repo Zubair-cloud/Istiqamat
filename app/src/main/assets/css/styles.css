@@ -5,9 +5,16 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+html {
+    background-color: #050816;
+    overscroll-behavior-y: none;
+}
+
 body {
     /* Use --bg-main from theme if available, otherwise fallback to default gradient */
     background: var(--bg-main, linear-gradient(180deg, #050816 0%, #0a0a1a 100%));
+    background-color: #050816;
+    overscroll-behavior-y: none;
     font-family: 'Lexend', system-ui, sans-serif;
     color: var(--text-main);
     min-height: 100vh;
