@@ -129,7 +129,7 @@ class WidgetFactory(private val context: Context) : RemoteViewsService.RemoteVie
     }
 
     override fun getItemId(position: Int): Long {
-        return position.toLong()
+        return if (position < habitList.size) habitList[position].id else position.toLong()
     }
 
     override fun hasStableIds(): Boolean {

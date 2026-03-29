@@ -14,8 +14,11 @@ service cloud.firestore {
                     && (
                       // Ya toh points update na ho rahe hon
                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points']) 
-                      // Ya agar ho rahe hain, toh puraane points aur naye points ka difference 50 se zyada na ho
+                      // Ya agar ho rahe hain, toh:
+                      // 1. Naye points puraane se max 50 zyada hosakte
                       || (request.resource.data.points - resource.data.points) <= 50
+                      // 2. Aur negative manipulation bhi max 500 tak hi chalegi
+                      && (resource.data.points - request.resource.data.points) <= 500
                     );
     }
   }

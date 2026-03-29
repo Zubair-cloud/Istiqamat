@@ -8,7 +8,7 @@
 body {
     /* Use --bg-main from theme if available, otherwise fallback to default gradient */
     background: var(--bg-main, linear-gradient(180deg, #050816 0%, #0a0a1a 100%));
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Lexend', system-ui, sans-serif;
     color: var(--text-main);
     min-height: 100vh;
     padding-bottom: 130px;
@@ -593,10 +593,11 @@ textarea,
     border-radius: 16px;
     color: #fff !important;
     outline: none;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Lexend', system-ui, sans-serif;
     font-size: 1rem;
     transition: all 0.2s;
     -webkit-appearance: none; /* Remove default styling */
+    appearance: none;
 }
 
 input:focus,

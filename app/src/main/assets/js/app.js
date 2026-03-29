@@ -302,13 +302,6 @@ function buyShield() {
     // Legacy mapping to new system or keep as shortcut
     buyItem('powerup', 'shield', 500); 
 }
-// Redefining internal buy logic for shield to match generic structure if desired, 
-// but for now keeping it compatible or migrating it.
-// Actually, let's keep buyShield separate or integrate it? 
-// The UI calls buyItem for modes. The Shield UI in previous step was removed?
-// Wait, I removed the Shield UI in index.html in the previous step?
-// Yes, I replaced the content of #shop-screen. I need to re-add the Shield item to renderRealShop in ui.js!
-
 
 // --- PROFILE ACTIONS ---
 function saveProfile() { 
@@ -375,6 +368,20 @@ function restoreData(input) {
                 if (!appData.history) appData.history = [];
                 if (!appData.user.unlocked_modes) appData.user.unlocked_modes = ['normal'];
                 if (!appData.user.unlocked_themes) appData.user.unlocked_themes = ['default'];
+
+                // XSS Sanitization — clean all user-facing string fields
+                if (typeof escapeHTML === 'function') {
+                    appData.user.name = escapeHTML(appData.user.name || 'User');
+                    appData.user.tagline = escapeHTML(appData.user.tagline || '');
+                    appData.habits.forEach(function(h) {
+                        h.title = escapeHTML(h.title || '');
+                    });
+                    Object.keys(appData.journal || {}).forEach(function(key) {
+                        if (typeof appData.journal[key] === 'string') {
+                            appData.journal[key] = escapeHTML(appData.journal[key]);
+                        }
+                    });
+                }
                 
                 saveData(); 
                 renderAll(); 
@@ -399,5 +406,3 @@ function wipeData() {
         }
     }); 
 }
-
-

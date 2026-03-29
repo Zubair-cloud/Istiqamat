@@ -325,6 +325,8 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Welcome back!", Toast.LENGTH_SHORT).show()
                 val data = document.data ?: return@addOnSuccessListener
                 val jsonStr = org.json.JSONObject(data).toString()
+                    .replace("\\", "\\\\")
+                    .replace("'", "\\'")
                 runOnUiThread {
                     webView.evaluateJavascript("if(window.updateFromCloud) window.updateFromCloud('$jsonStr');", null)
                 }
@@ -339,6 +341,8 @@ class MainActivity : AppCompatActivity() {
                 )
                 userRef.set(newUser).addOnSuccessListener {
                     val jsonStr = org.json.JSONObject(newUser).toString()
+                        .replace("\\", "\\\\")
+                        .replace("'", "\\'")
                     runOnUiThread {
                         webView.evaluateJavascript("if(window.updateFromCloud) window.updateFromCloud('$jsonStr');", null)
                     }
