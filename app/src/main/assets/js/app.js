@@ -50,6 +50,11 @@ window.onload = () => {
         saveData();
     }
     
+    // Init Theme
+    if (appData.user.theme && appData.user.theme !== 'default') {
+        switchTheme(appData.user.theme);
+    }
+    
     renderAll();
 };
 
@@ -62,6 +67,7 @@ window.updateFromCloud = function(jsonStr) {
         appData.user.special_coins = typeof cloudData.special_coins !== 'undefined' ? cloudData.special_coins : 0;
         appData.user.shields = typeof cloudData.shields !== 'undefined' ? cloudData.shields : appData.user.shields;
         appData.user.email = cloudData.email || "User";
+        appData.user.name = cloudData.name || appData.user.name || "User";
         if(cloudData.premium_until) appData.user.premium_until = cloudData.premium_until;
         
         saveData();
@@ -86,6 +92,15 @@ window.onSecureAdRewardSuccess = function(amount) {
 }
 
 function watchAdForPoints() {
+    if (!appData.user.email || appData.user.email === "User") {
+        glassConfirm("You must connect your Google Account to earn rewards. Go to Settings?", "ph-fill ph-google-logo").then(function(yes) {
+            if(yes) {
+                openSettingsModal();
+            }
+        });
+        return;
+    }
+
     const today = getLocalDateStr();
     if (appData.adWatchDate !== today) {
          appData.adWatchCount = 0;

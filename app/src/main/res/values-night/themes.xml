@@ -6,5 +6,8 @@
         <item name="android:statusBarColor">#050816</item>
         <item name="android:navigationBarColor">#050816</item>
         <item name="android:fitsSystemWindows">true</item>
+        <!-- Fixes the bright white bounce ribbons on scroll -->
+        <item name="android:windowBackground">#050816</item>
+        <item name="android:colorEdgeEffect">#050816</item>
     </style>
 </resources>

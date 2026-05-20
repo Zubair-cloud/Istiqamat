@@ -23,7 +23,7 @@ function sanitizeNumeric(val, fallback) {
 
 // --- APP STATE ---
 var appData = {
-    user: { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', unlocked_modes: ['normal'], unlocked_themes: ['default'] },
+    user: { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', theme: 'default', unlocked_modes: ['normal'], unlocked_themes: ['default'] },
     habits: [
         { id: 1001, title: "Morning Meditation", icon: "ph-brain", type: "simple", streak: 0, time: "06:00" },
         { id: 1002, title: "Hydrate", icon: "ph-drop", type: "counter", streak: 0, target: 8, time: "" }
@@ -51,7 +51,8 @@ function loadData() {
             if (!appData.habitLogs) appData.habitLogs = {};
             if (!appData.journal) appData.journal = {};
             if (!appData.history) appData.history = [];
-            if (!appData.user) appData.user = { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', unlocked_modes: ['normal'], unlocked_themes: ['default'] };
+            if (!appData.user) appData.user = { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', theme: 'default', unlocked_modes: ['normal'], unlocked_themes: ['default'] };
+            if (!appData.user.theme) appData.user.theme = 'default';
             if (!Array.isArray(appData.habits)) appData.habits = [];
 
             // NaN sanitization on critical numeric fields
@@ -69,7 +70,7 @@ function loadData() {
         console.error('Data load failed — starting fresh:', e);
         if (typeof showToast === 'function') showToast('Data corrupted, starting fresh 🔄');
         appData = {
-            user: { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', unlocked_modes: ['normal'], unlocked_themes: ['default'] },
+            user: { name: "User", tagline: "Stay Consistent", points: 0, shields: 0, mode: 'normal', theme: 'default', unlocked_modes: ['normal'], unlocked_themes: ['default'] },
             habits: [],
             habitLogs: {},
             journal: {},

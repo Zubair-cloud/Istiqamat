@@ -105,7 +105,7 @@ function renderRealShop() {
 
     let html = `<h2 class="section-title">Personalities</h2><div class="shop-list">`;
     
-    modes.forEach(m => {
+    modes.forEach((m, idx) => {
         const isUnlocked = appData.user.unlocked_modes && appData.user.unlocked_modes.includes(m.id);
         const isEquipped = appData.user.mode === m.id;
         
@@ -121,7 +121,7 @@ function renderRealShop() {
         }
 
         html += `
-        <div class="shop-card-wide">
+        <div class="shop-card-wide" style="animation-delay:${idx * 0.05}s;">
             <div class="icon-box">
                 <span class="material-symbols-rounded" style="font-size:1.5rem; color:var(--neon-cyan);">${m.icon}</span>
             </div>
@@ -178,7 +178,7 @@ function renderRealShop() {
         { id: 'ruby-red', name: 'Ruby Red', desc: 'Deep Red & Intense Passion.', price: 300, icon: 'favorite' }
     ];
 
-    themes.forEach(t => {
+    themes.forEach((t, idx) => {
         const isUnlocked = appData.user.unlocked_themes && appData.user.unlocked_themes.includes(t.id);
         const isActive = appData.user.theme === t.id; // We need to store active theme in appData.user.theme if not already
 
@@ -192,7 +192,7 @@ function renderRealShop() {
         }
 
         html += `
-        <div class="shop-card-wide" style="display:flex; justify-content:space-between; align-items:center; padding:15px; border-radius:16px; margin-bottom:10px; background:var(--glass-bg); border:1px solid var(--glass-border);">
+        <div class="shop-card-wide" style="animation-delay:${idx * 0.05}s; display:flex; justify-content:space-between; align-items:center; padding:15px; border-radius:16px; margin-bottom:10px; background:var(--glass-bg); border:1px solid var(--glass-border);">
             <div style="display:flex; align-items:center;">
                 <div class="icon-box" style="margin-right:15px;">
                     <span class="material-symbols-rounded" style="font-size:1.8rem; color:${t.id === 'ruby-red' ? '#ff0033' : (t.id === 'neon-gold' ? '#ffd700' : 'var(--neon-cyan)')};">${t.icon}</span>
@@ -270,7 +270,7 @@ function renderHabits() {
     list.innerHTML = '';
     if (appData.habits.length === 0) list.innerHTML = `<p style="text-align:center; color:#666; margin-top:30px;">No habits yet. Click + to add.</p>`;
 
-    appData.habits.forEach(h => {
+    appData.habits.forEach((h, idx) => {
         const logKey = `${appData.currentDate}-${h.id}`;
         const dayLog = appData.habitLogs[logKey] || { completed: false, val: 0 };
         const isComplete = dayLog.completed ? 'completed' : '';
@@ -282,7 +282,7 @@ function renderHabits() {
         const timeDisplay = h.time ? `<span class="habit-time-badge">${h.time}</span>` : '';
 
         const html = `
-  <div class="glass-panel habit-card ${isComplete}" onclick="handleHabitClick(${h.id})">
+  <div class="glass-panel habit-card ${isComplete}" style="animation-delay:${idx * 0.05}s;" onclick="handleHabitClick(${h.id})">
     <div class="habit-info">
       <i class="ph-fill ${h.icon} habit-icon"></i>
       <div class="habit-text">
@@ -306,10 +306,10 @@ function renderManageList() {
     if(!list) return;
     list.innerHTML = '';
     if (appData.habits.length === 0) { list.innerHTML = `<p style="text-align:center; color:#666; margin-top:20px;">Nothing to manage.</p>`; return; }
-    appData.habits.forEach(h => {
+    appData.habits.forEach((h, idx) => {
         const timeText = h.time ? `• ${h.time}` : '';
         const html = `
-      <div class="glass-panel habit-card" onclick="openEditModal(${h.id})" style="cursor:pointer;">
+      <div class="glass-panel habit-card" onclick="openEditModal(${h.id})" style="animation-delay:${idx * 0.05}s; cursor:pointer;">
         <div class="habit-info">
             <i class="ph-fill ${h.icon} habit-icon"></i>
             <div class="habit-text">
