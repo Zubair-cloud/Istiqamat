@@ -396,7 +396,7 @@ function renderHeatmap() {
         if (i === 1) labelText = `${i} ${monthName.substring(0, 3)}`;
 
         div.innerHTML = `
-        <div class="heat-box ${isToday ? 'today' : ''}" style="background:${bgStyle}; ${intensity > 0 ? 'box-shadow:0 0 5px var(--neon-green);' : ''}"></div>
+        <div class="heat-box ${isToday ? 'today' : ''}" style="background:${bgStyle}; ${intensity > 0 ? 'box-shadow:0 0 5px var(--neon-green);' : ''}; cursor:pointer;" onclick="showCompletedHabitsForDate('${dateStr}')"></div>
         <span class="heat-label" style="${isToday ? 'color:var(--neon-cyan); font-weight:bold;' : ''}">${labelText}</span>
     `;
         grid.appendChild(div);
@@ -501,4 +501,65 @@ function toggleTargetInput() {
     if(typeEl && group) {
         group.style.display = typeEl.value === 'counter' ? 'block' : 'none';
     }
+}
+
+function showCompletedHabitsForDate(dateStr) {
+    if (typeof vibrateDevice === 'function') vibrateDevice(30);
+    
+    const d = new Date(dateStr);
+    const dateFormatted = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    
+    const titleEl = document.getElementById('completed-modal-title');
+    if (titleEl) {
+        titleEl.textContent = `Habits for ${dateFormatted}`;
+    }
+    
+    const listEl = document.getElementById('completed-habits-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    
+    if (appData.habits.length === 0) {
+        listEl.innerHTML = `<p style="text-align:center; color:#666; padding:20px; font-size:0.9rem;">No habits defined yet.</p>`;
+    } else {
+        appData.habits.forEach(h => {
+            const logKey = `${dateStr}-${h.id}`;
+            const dayLog = appData.habitLogs[logKey] || { completed: false, val: 0 };
+            const isCompleted = dayLog.completed;
+            
+            let statusBadge = '';
+            if (h.type === 'simple') {
+                statusBadge = isCompleted 
+                    ? `<span style="color: var(--neon-green); font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px;"><i class="ph-bold ph-check-circle"></i> Done</span>` 
+                    : `<span style="color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 4px;"><i class="ph-bold ph-circle"></i> Missed</span>`;
+            } else {
+                statusBadge = isCompleted 
+                    ? `<span style="color: var(--neon-green); font-size: 0.9rem; font-weight: bold; display: flex; align-items: center; gap: 4px;"><i class="ph-bold ph-check-circle"></i> ${dayLog.val}/${h.target}</span>` 
+                    : `<span style="color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 4px;"><i class="ph-bold ph-circle"></i> ${dayLog.val}/${h.target}</span>`;
+            }
+            
+            const habitHtml = `
+                <div class="glass-panel" style="padding:15px; border-radius:16px; border: 1px solid ${isCompleted ? 'rgba(0, 255, 140, 0.2)' : 'rgba(255, 255, 255, 0.05)'}; background: ${isCompleted ? 'rgba(0, 255, 140, 0.05)' : 'rgba(255, 255, 255, 0.02)'}; display:flex; justify-content:space-between; align-items:center; box-shadow:none; margin-bottom:4px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <i class="ph-fill ${h.icon || 'ph-star'}" style="font-size:1.3rem; color:${isCompleted ? 'var(--neon-green)' : '#fff'};"></i>
+                        <div style="text-align:left;">
+                            <h4 style="font-size:0.95rem; font-weight:600; color:#fff; ${isCompleted ? 'text-decoration:line-through; opacity:0.7;' : ''}">${escapeHTML(h.title)}</h4>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">${h.type === 'simple' ? 'Simple' : 'Daily Target: ' + h.target}</p>
+                        </div>
+                    </div>
+                    <div>
+                        ${statusBadge}
+                    </div>
+                </div>
+            `;
+            listEl.insertAdjacentHTML('beforeend', habitHtml);
+        });
+    }
+    
+    const modal = document.getElementById('completed-habits-modal');
+    if (modal) modal.classList.add('open');
+}
+
+function closeCompletedHabitsModal() {
+    const modal = document.getElementById('completed-habits-modal');
+    if (modal) modal.classList.remove('open');
 }

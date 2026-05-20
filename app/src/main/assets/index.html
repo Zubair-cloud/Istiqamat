@@ -260,7 +260,7 @@
             <h2 style="margin-bottom:20px;">New Habit</h2>
             <div class="input-group">
                 <label>Habit Name</label>
-                <input type="text" id="new-habit-name" placeholder="e.g., Read Quran">
+                <input type="text" id="new-habit-name" placeholder="e.g., Learning new to">
             </div>
             <div class="input-group">
                 <label>Type</label>
@@ -320,6 +320,18 @@
                 <button id="glass-dialog-cancel" class="btn-primary" style="background:rgba(255,255,255,0.08); color:#fff; flex:1;" onclick="resolveGlassDialog(false)">Cancel</button>
                 <button id="glass-dialog-ok" class="btn-primary" style="flex:1;" onclick="resolveGlassDialog(true)">Confirm</button>
             </div>
+        </div>
+    </div>
+
+    <!-- COMPLETED HABITS MODAL -->
+    <div class="modal-overlay" id="completed-habits-modal">
+        <div class="glass-panel add-modal" style="max-height: 80vh; overflow-y: auto;">
+            <h2 id="completed-modal-title" style="margin-bottom:20px; font-size:1.3rem; color:#fff;">Habits Completed</h2>
+            <div id="completed-habits-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+                <!-- Populated by JS -->
+            </div>
+            <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:#fff; width:100%;"
+                onclick="closeCompletedHabitsModal()">Close</button>
         </div>
     </div>
 
